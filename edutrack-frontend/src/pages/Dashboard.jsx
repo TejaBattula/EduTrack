@@ -14,6 +14,8 @@ import wrongper from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/c
 import productper from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/square-dashed-kanban.svg"
 import CircularProgress from '../components/chart/circleChart';
 const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
+  console.log("dashboard",user);
+  
   const [exams, setExams] = useState([]);
   const [userResults, setUserResults] = useState({});
   const [loading, setLoading] = useState(true);
@@ -275,10 +277,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
               <span className="detail-value">{user.department}</span>
             </div>
     
-            <div className="user-detail-item">
-              <span className="detail-label">Academic Year</span>
-              <span className="detail-value">{user.year}</span>
-            </div>
+            
     
             <div className="user-detail-item">
               <span className="detail-label">Section</span>

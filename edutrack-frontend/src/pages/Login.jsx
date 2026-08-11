@@ -18,7 +18,13 @@ const ALLOWED_DOMAIN = 'rguktsklm.ac.in';
 
 const Login = ({ setUser }) => {
   const [isRegister, setIsRegister] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    department: '',
+    section: ''
+  });
   const [error, setError] = useState('');
   const [showAdmin, setShowAdmin] = useState(false);
   const [loading,setloading]=useState(false)
@@ -36,7 +42,8 @@ const Login = ({ setUser }) => {
     e.preventDefault();
     setError('');
     setloading(true)
-
+    console.log(formData);
+    
     // 1. Email Domain Check
     const role = validateAndGetRole(formData.email);
     if (!role) {
@@ -50,6 +57,8 @@ const Login = ({ setUser }) => {
 
     try {
       const res = await axios.post(endpoint, { ...formData, role });
+      console.log("formdata login",formData);
+      
       if (!isRegister) {
         const userData = { ...res.data.user, role: res.data.user?.role || role };
         localStorage.setItem('user', JSON.stringify(userData));
@@ -160,6 +169,45 @@ const Login = ({ setUser }) => {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
           />
          </div>
+         {
+          isRegister?
+          <><div className="form-field">
+          <p>Department</p>
+          <select
+            value={formData.department}
+            onChange={(e) =>
+              setFormData({ ...formData, department: e.target.value })
+            }
+            required
+          >
+            <option value="">Select Department</option>
+            <option value="CSE">Computer Science and Engineering</option>
+            <option value="ECE">Electronics and Communication Engineering</option>
+            <option value="EEE">Electrical and Electronics Engineering</option>
+            <option value="MECH">Mechanical Engineering</option>
+            <option value="CIVIL">Civil Engineering</option>
+          </select>
+        </div>
+        
+        <div className="form-field">
+          <p>Section</p>
+          <select
+            value={formData.section}
+            onChange={(e) =>
+              setFormData({ ...formData, section: e.target.value })
+            }
+            required
+          >
+            <option value="">Select Section</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="E">E</option>
+          </select>
+        </div>
+         </>:""
+         }
           <button type="submit" className="login-submit-btn">
             {isRegister ? 'Register' : loading===true?"Authenticating please wait...":"Login"}
           </button>
