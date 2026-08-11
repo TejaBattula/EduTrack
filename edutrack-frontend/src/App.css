@@ -1,0 +1,80 @@
+.app-container {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  padding-bottom: 40px;
+  font-family: sans-serif;
+}
+
+.app-navbar {
+  height: 70px;
+  background: #0f172a;
+  color: #fff;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0px;
+  z-index: 1000;
+}
+.edutrack-icon{
+  width: 50px;
+  height: 50px;
+  background-color: #1c58da;
+  box-shadow: 0px 0px 15px #567cce;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.app-title {
+  font-weight: bold;
+  font-size: 16px;
+}
+.edutrack-head{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+.app-user-info {
+  margin-left: 10px;
+  color: #94a3b8;
+}
+
+.app-nav-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-nav {
+  padding: 6px 14px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  background-color: #334155;
+  color: #fff;
+  transition: background-color 0.2s ease;
+}
+
+.btn-nav:hover {
+  opacity: 0.9;
+}
+
+.btn-nav-active {
+  background-color: #2563eb;
+}
+
+.btn-admin-active {
+  background-color: #6366f1;
+}
+
+.btn-logout {
+  background-color: #ef4444;
+}
+
+.btn-logout:hover {
+  background-color: #dc2626;
+}

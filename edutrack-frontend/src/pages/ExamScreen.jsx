@@ -1,0 +1,366 @@
+import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import './ExamScreen.css';
+
+const ExamScreen = ({ user, examId, setExamId }) => {
+  const [exam, setExam] = useState(null);
+  const [questions, setQuestions] = useState([]);
+  const [currentQIndex, setCurrentQIndex] = useState(0);
+  const [userAnswers, setUserAnswers] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [stats, setStats] = useState(null);
+
+  // ⏱️ Timer State (Default: 60 mins = 3600 seconds)
+  const [timeLeft, setTimeLeft] = useState(3600);
+  
+  // 🚨 Warning State for Tab Switch
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [showWarning, setShowWarning] = useState(false);
+
+  // UseRef to maintain latest state inside event listeners
+  const isSubmittedRef = useRef(isSubmitted);
+  const userAnswersRef = useRef(userAnswers);
+  const questionsRef = useRef(questions);
+
+  useEffect(() => {
+    isSubmittedRef.current = isSubmitted;
+    userAnswersRef.current = userAnswers;
+    questionsRef.current = questions;
+  }, [isSubmitted, userAnswers, questions]);
+
+  // 1. Fetch Exam Details & Check Previous Attempt
+  useEffect(() => {
+    const fetchExamData = async () => {
+      try {
+        setLoading(true);
+
+        if (user?.id) {
+          try {
+            const checkRes = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/result/${examId}/${user.id}`);
+            if (checkRes.data.attempted) {
+              const prev = checkRes.data.result;
+              setStats({
+                score: prev.score,
+                totalQuestions: prev.total_questions,
+                percentage: prev.percentage
+              });
+              setIsSubmitted(true);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.error('Error checking previous attempt:', err);
+          }
+        }
+
+        let res;
+        try {
+          res = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/${examId}`);
+        } catch (e) {
+          const allRes = await axios.get('https://edutrack-backend-rtoh.onrender.com/api/exams/all');
+          const found = allRes.data.find((e) => String(e.id) === String(examId));
+          res = { data: found };
+        }
+
+        const examData = res.data;
+        if (examData) {
+          setExam(examData);
+          let qData = [];
+          if (typeof examData.questions === 'string') {
+            qData = JSON.parse(examData.questions || '[]');
+          } else if (Array.isArray(examData.questions)) {
+            qData = examData.questions;
+          }
+          setQuestions(qData);
+
+          // Set exam duration if provided (in minutes), else default to 60 mins
+          const durationSeconds = (examData.duration_minutes || 60) * 60;
+          setTimeLeft(durationSeconds);
+        }
+      } catch (err) {
+        console.error('Error loading exam details:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (examId) {
+      fetchExamData();
+    }
+  }, [examId, user]);
+
+  // 2. Submit Exam Function
+  const handleSubmitExam = async (isAutoSubmit = false, reason = '') => {
+    if (submitting || isSubmittedRef.current) return;
+
+    if (!isAutoSubmit) {
+      if (!window.confirm('Are you sure you want to submit the exam?')) return;
+    } else if (reason) {
+      alert(reason);
+    }
+
+    setSubmitting(true);
+
+    const answersToSubmit = userAnswersRef.current;
+    const currentQuestions = questionsRef.current;
+
+    try {
+      const payload = {
+        userId: user?.id,
+        examId: examId,
+        userAnswers: answersToSubmit
+      };
+
+      const res = await axios.post('https://edutrack-backend-rtoh.onrender.com/api/exams/submit', payload);
+
+      if (res.data && res.data.stats) {
+        setStats(res.data.stats);
+      } else {
+        let calculatedScore = 0;
+        currentQuestions.forEach((q, index) => {
+          const selected = answersToSubmit[index];
+          const correct = q.correct_option || q.answer;
+          if (selected && selected.trim().toLowerCase() === correct?.trim().toLowerCase()) {
+            calculatedScore += 1;
+          }
+        });
+
+        const total = currentQuestions.length;
+        setStats({
+          score: calculatedScore,
+          totalQuestions: total,
+          percentage: total > 0 ? ((calculatedScore / total) * 100).toFixed(2) : 0
+        });
+      }
+
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error('Submit Exam Error:', err);
+      alert('Error submitting exam!');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // 3. ⏱️ 1-Hour Countdown Timer Logic
+  useEffect(() => {
+    if (loading || isSubmitted || !exam) return;
+
+    const timerInterval = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          clearInterval(timerInterval);
+          handleSubmitExam(true, '⏱️ Time is up! Your exam has been automatically submitted.');
+          return 0;
+        }
+        return prevTime - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [loading, isSubmitted, exam]);
+
+  // 4. 🚨 Anti-Cheating Tab Switch Detection
+  useEffect(() => {
+    if (loading || isSubmitted || !exam) return;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setTabSwitchCount((prevCount) => {
+          const newCount = prevCount + 1;
+          if (newCount === 1) {
+            setShowWarning(true);
+          } else if (newCount >= 2) {
+            handleSubmitExam(true, '🚨 You switched tabs again! Exam is automatically submitted due to violation.');
+          }
+          return newCount;
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [loading, isSubmitted, exam]);
+
+  // Format time (Seconds to MM:SS)
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleOptionSelect = (optionValue) => {
+    setUserAnswers({
+      ...userAnswers,
+      [currentQIndex]: optionValue,
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="exam-screen-loading">
+        ⏳ Loading Exam Details...
+      </div>
+    );
+  }
+
+  // 📊 Statistics Display Screen
+  if (isSubmitted && stats) {
+    const wrongAnswers = Number(stats.totalQuestions) - Number(stats.score);
+
+    return (
+      <div className="results-card">
+        <h2 className="results-title">🎉 Exam Performance Details</h2>
+        <p className="results-subtitle">You have already completed this test. Here are your statistics:</p>
+        
+        <div className="results-stats-grid">
+          <div className="stat-box">
+            <span className="stat-box-title">FINAL SCORE</span>
+            <div className="stat-score-val">
+              {stats.score} / {stats.totalQuestions}
+            </div>
+          </div>
+
+          <div className="stat-box">
+            <span className="stat-box-title">ACCURACY</span>
+            <div className="stat-accuracy-val">
+              {stats.percentage}%
+            </div>
+          </div>
+
+          <div className="stat-box-correct">
+            <span className="stat-box-correct-title">Correct Answers</span>
+            <div className="stat-box-correct-val">{stats.score}</div>
+          </div>
+
+          <div className="stat-box-wrong">
+            <span className="stat-box-wrong-title">Wrong / Unanswered</span>
+            <div className="stat-box-wrong-val">{wrongAnswers}</div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setExamId(null)}
+          className="btn-return-dashboard"
+        >
+          ⬅️ Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  if (!exam || questions.length === 0) {
+    return (
+      <div className="exam-not-found">
+        <h3>Exam details or questions not found!</h3>
+        <button onClick={() => setExamId(null)} className="btn-back-dashboard">
+          Back to Dashboard
+        </button>
+      </div>
+    );
+  }
+
+  const currentQ = questions[currentQIndex];
+  
+  const optionsMap = [
+    { key: 'Option A', text: currentQ.option_a || currentQ.options?.[0] },
+    { key: 'Option B', text: currentQ.option_b || currentQ.options?.[1] },
+    { key: 'Option C', text: currentQ.option_c || currentQ.options?.[2] },
+    { key: 'Option D', text: currentQ.option_d || currentQ.options?.[3] },
+  ];
+
+  return (
+    <div className="exam-container">
+      
+      {/* 🚨 Tab Switch Warning Modal */}
+      {showWarning && (
+        <div className="warning-overlay">
+          <div className="warning-modal">
+            <h3 className="warning-modal-title">⚠️ WARNING!</h3>
+            <p className="warning-modal-text">
+              You switched tabs or minimized the window. Switching tabs is strictly prohibited!
+            </p>
+            <p className="warning-modal-danger">
+              If you switch tabs one more time, your exam will be automatically SUBMITTED!
+            </p>
+            <button
+              onClick={() => setShowWarning(false)}
+              className="btn-warning-dismiss"
+            >
+              I Understand, Continue Exam
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Top Bar with Timer */}
+      <div className="exam-header">
+        <div>
+          <h2 className="exam-header-title">{exam.title}</h2>
+          <small className="exam-header-sub">Question {currentQIndex + 1} of {questions.length}</small>
+        </div>
+
+        {/* ⏱️ Live Timer Banner */}
+        <div className={`exam-timer ${timeLeft < 300 ? 'timer-warning' : ''}`}>
+          ⏱️ {formatTime(timeLeft)}
+        </div>
+      </div>
+
+      {/* Question Box */}
+      <div className="exam-question-card">
+        <h3 className="exam-question-text">{currentQ?.question || currentQ?.title}</h3>
+
+        <div className="options-list">
+          {optionsMap.map((opt) => {
+            if (!opt.text) return null;
+            const isSelected = userAnswers[currentQIndex] === opt.key;
+
+            return (
+              <button
+                key={opt.key}
+                onClick={() => handleOptionSelect(opt.key)}
+                className={`option-btn ${isSelected ? 'option-btn-selected' : ''}`}
+              >
+                <strong>{opt.key}:</strong> {opt.text}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="exam-nav-bar">
+        <button
+          disabled={currentQIndex === 0}
+          onClick={() => setCurrentQIndex((prev) => prev - 1)}
+          className="btn-nav-prev"
+        >
+          ⬅️ Previous
+        </button>
+
+        {currentQIndex === questions.length - 1 ? (
+          <button
+            onClick={() => handleSubmitExam(false)}
+            disabled={submitting}
+            className={`btn-submit-exam ${submitting ? 'btn-submitting' : ''}`}
+          >
+            {submitting ? 'Submitting...' : '✅ Submit Test'}
+          </button>
+        ) : (
+          <button
+            onClick={() => setCurrentQIndex((prev) => prev + 1)}
+            className="btn-nav-next"
+          >
+            Next ➡️
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default ExamScreen;
