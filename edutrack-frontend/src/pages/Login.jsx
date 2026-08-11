@@ -5,7 +5,6 @@ import { jwtDecode } from 'jwt-decode';
 import './Login.css';
 import edutrack_icon from "../assets/graduation-cap.svg"
 import adminSheild from "../assets/user-shield.svg"
-import { useNavigate } from 'react-router-dom';
 import AdminDashboard from './AdminDashboard';
 // 👑 Specific Allowed Admin Mails
 const ALLOWED_ADMIN_EMAILS = [
@@ -48,6 +47,7 @@ const Login = ({ setUser }) => {
     const role = validateAndGetRole(formData.email);
     if (!role) {
       setError(`Access Restricted! Only @${ALLOWED_DOMAIN} email IDs are allowed.`);
+      setloading(false);
       return;
     }
 
@@ -56,14 +56,22 @@ const Login = ({ setUser }) => {
       : 'https://edutrack-backend-rtoh.onrender.com/api/auth/login';
 
     try {
-      const res = await axios.post(endpoint, { ...formData, role });
+      // const res = await axios.post(endpoint, { ...formData, role });
       console.log("formdata login",formData);
+      const response = await fetch(isRegister?"http://localhost:3000/signup":"http://localhost:3000/login",{
+        method : "POST",
+        headers : {"Content-Type":"application/json"},
+        body : JSON.stringify(formData)
+      })
+      const data = await response.json()
+      console.log(data.message);
       
       if (!isRegister) {
-        const userData = { ...res.data.user, role: res.data.user?.role || role };
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', res.data.token);
-        setUser(userData);
+        // const userData = { ...res.data.user, role: res.data.user?.role || role };
+        // localStorage.setItem('user', JSON.stringify(userData));
+        // localStorage.setItem('token', res.data.token);
+        setUser(data.data);
+
       } else {
         alert('Registration Successful! Please login.');
         setIsRegister(false);
@@ -110,11 +118,12 @@ const Login = ({ setUser }) => {
     <div className="login-container">
       
     {showAdmin ?
-      <AdminDashboard
-        user={formData}
-        onSwitchToStudent={() => setShowAdmin(false)}
-        onLogout={() => setShowAdmin(false)}
-      />
+    <AdminDashboard
+      user={formData}
+      setUser={setUser}
+      onSwitchToStudent={() => setShowAdmin(false)}
+      onLogout={() => setShowAdmin(false)}
+    />
     :
       <div className="login-card">
         <div>

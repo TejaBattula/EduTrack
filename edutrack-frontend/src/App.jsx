@@ -40,7 +40,7 @@ function App() {
           </div>
           <span className="app-title">EduTrack Portal</span>
           <small className="app-user-info">
-            Logged in as: <strong>{user.name || user.email}</strong> ({user.role || 'student'})
+            Logged in as: <strong>{user.name || user.email}</strong> student
           </small>
          </div>
           

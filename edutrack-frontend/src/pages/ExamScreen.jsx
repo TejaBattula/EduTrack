@@ -54,10 +54,10 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         // Fetch Exam metadata and questions first so we have questions array for review
         let examRes;
         try {
-          examRes = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/${examId}`);
+          examRes = await axios.get(`http://localhost:3000/api/exams/${examId}`);
         } catch (e) {
-          const allRes = await axios.get('https://edutrack-backend-rtoh.onrender.com/api/exams/all');
-          const found = allRes.data.find((e) => String(e.id) === String(examId));
+          const allRes = await axios.get('http://localhost:3000/api/exams/all');
+          const found = allRes.data.find((exam) => String(exam.id) === String(examId));
           examRes = { data: found };
         }
 
@@ -74,7 +74,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         // Check Previous Attempt
         if (user?.id) {
           try {
-            const checkRes = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/result/${examId}/${user.id}`);
+            const checkRes = await axios.get(`http://localhost:3000/api/exams/result/${examId}/${user.id}`);
             if (checkRes.data.attempted) {
               const prev = checkRes.data.result;
               setStats({
@@ -111,51 +111,95 @@ const ExamScreen = ({ user, examId, setExamId }) => {
   // 2. Submit Exam Function
   const handleSubmitExam = async (isAutoSubmit = false, reason = '') => {
     if (submitting || isSubmittedRef.current) return;
-
+  
     if (!isAutoSubmit) {
-      if (!window.confirm('Are you sure you want to submit the exam?')) return;
+      if (!window.confirm('Are you sure you want to submit the exam?')) {
+        return;
+      }
     } else if (reason) {
       alert(reason);
     }
-
+  
     setSubmitting(true);
-
+  
     const answersToSubmit = userAnswersRef.current;
     const currentQuestions = questionsRef.current;
-
+  
     try {
       const payload = {
-        userId: user?.id,
+        userEmail : user.email,
+        userId: user?._id || user?.id,
         examId: examId,
-        userAnswers: answersToSubmit
+        userAnswers: answersToSubmit,
+        questions: currentQuestions
       };
-
-      const res = await axios.post('https://edutrack-backend-rtoh.onrender.com/api/exams/submit', payload);
-
-      if (res.data && res.data.stats) {
-        setStats(res.data.stats);
+  
+      console.log("Submitting payload:", payload);
+  
+      const response = await fetch(
+        "http://localhost:3000/submitexam",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        }
+      );
+  
+      const data = await response.json();
+  
+      console.log("Submit response:", data);
+  
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit exam");
+      }
+  
+      // Backend calculated statistics
+      if (data.data?.stats) {
+        setStats({
+          score: data.data.stats.score,
+          totalQuestions: data.data.stats.totalQuestions,
+          percentage: data.data.stats.percentage
+        });
       } else {
+        // Fallback calculation
         let calculatedScore = 0;
+  
         currentQuestions.forEach((q, index) => {
           const selected = answersToSubmit[index];
-          const correct = q.correct_option || q.answer;
-          if (selected && selected.trim().toLowerCase() === correct?.trim().toLowerCase()) {
+  
+          const correct =
+            q.correct_option ||
+            q.answer;
+  
+          if (
+            selected &&
+            correct &&
+            selected.trim().toLowerCase() ===
+              correct.trim().toLowerCase()
+          ) {
             calculatedScore += 1;
           }
         });
-
+  
         const total = currentQuestions.length;
+  
         setStats({
           score: calculatedScore,
           totalQuestions: total,
-          percentage: total > 0 ? ((calculatedScore / total) * 100).toFixed(2) : 0
+          percentage:
+            total > 0
+              ? ((calculatedScore / total) * 100).toFixed(2)
+              : 0
         });
       }
-
+  
       setIsSubmitted(true);
+  
     } catch (err) {
-      console.error('Submit Exam Error:', err);
-      alert('Error submitting exam!');
+      console.error("Submit Exam Error:", err);
+      alert("Error submitting exam!");
     } finally {
       setSubmitting(false);
     }

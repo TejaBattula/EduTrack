@@ -21,11 +21,14 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dashboardView,setdashboardView]=useState('dashboard')
+  const [noattemptedexams,setnoattemptedexams]=useState(0)
+  const [correctans,setcorrectans]=useState(0)
+
   // Fetch Exams and User Attempt Results from Backend
   const fetchExams = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('https://edutrack-backend-rtoh.onrender.com/api/exams/all');
+      const res = await axios.get('http://localhost:3000/api/exams/all');
       
       let examList = [];
       if (Array.isArray(res.data)) {
@@ -36,11 +39,11 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
       }
 
       // Check user results for each exam if user is logged in
-      if (user?.id && examList.length > 0) {
+      if (user?._id && examList.length > 0) {
         const resultsMap = {};
         for (let exam of examList) {
           try {
-            const checkRes = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/result/${exam.id}/${user.id}`);
+            const checkRes = await axios.get(`http://localhost:3000/api/exams/result/${exam.id}/${user._id}`);
             if (checkRes.data.attempted) {
               resultsMap[exam.id] = checkRes.data.result;
             }
@@ -164,7 +167,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             </div>
           </div>
           </div>
-          <CircularProgress totalsubmittedexams={exams.length}/>
+          <CircularProgress percentage={0} totalMarksObtained={0} totalMaxMarks={exams.length}/>
           {/* <CircularProgress totalsubmittedexams={exams.length}/>
           <CircularProgress totalsubmittedexams={exams.length}/> */}
 
@@ -200,7 +203,8 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
   
               const result = userResults[exam.id];
               const isAttempted = !!result;
-  
+              
+              
               return (
                 <div 
                   key={exam.id} 
@@ -223,6 +227,8 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
                       {/* Display Attempt Score Status */}
                       {isAttempted && (
                         <p className="score-badge">
+                          {console.log(result.score)
+                          }
                           🎯 Score: {result.score} / {result.total_questions} ({result.percentage}%)
                         </p>
                       )}
