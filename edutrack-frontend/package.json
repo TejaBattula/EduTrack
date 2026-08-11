@@ -26,5 +26,10 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "globals": "^15.0.0",
     "vite": "^5.2.0"
+  },
+  "scripts":{
+    "dev":"vite",
+    "build":"vite build",
+    "preview":"vite preview"
   }
 }

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
-import log_out_btn from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/log-out-outline.svg"
-import person_circle from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/person-circle-outline.svg"
-import book from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/book-open-text.svg"
-import send from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/send.svg"
-import profile from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/user-shield.svg"
-import layout_dashboard from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/layout-dashboard.svg"
-import refresh from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/refresh-cw.svg"
-import book_check from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/notepad-text.svg"
-import correctper from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/book-open-check.svg"
-import wrongper from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/circle-x.svg"
-import productper from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/square-dashed-kanban.svg"
+import log_out_btn from "../assets/log-out-outline.svg"
+import person_circle from "../assets/person-circle-outline.svg"
+import book from "../assets/book-open-text.svg"
+import send from "../assets/send.svg"
+import profile from "../assets/user-shield.svg"
+import layout_dashboard from "../assets/layout-dashboard.svg"
+import refresh from "../assets/refresh-cw.svg"
+import book_check from "../assets/notepad-text.svg"
+import correctper from "../assets/book-open-check.svg"
+import wrongper from "../assets/circle-x.svg"
+import productper from "../assets/square-dashed-kanban.svg"
 import CircularProgress from '../components/chart/circleChart';
 const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
   console.log("dashboard",user);
