@@ -3,8 +3,8 @@ import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import './Login.css';
-import edutrack_icon from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/graduation-cap.svg"
-import adminSheild from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/user-shield.svg"
+import edutrack_icon from "../assets/graduation-cap.svg"
+import adminSheild from "../assets/user-shield.svg"
 import { useNavigate } from 'react-router-dom';
 import AdminDashboard from './AdminDashboard';
 // 👑 Specific Allowed Admin Mails

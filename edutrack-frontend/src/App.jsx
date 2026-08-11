@@ -4,7 +4,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ExamScreen from './pages/ExamScreen';
 import LoginScreen from "./pages/Login";
 import './App.css';
-import grad_cap from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/graduation-cap.svg"
+import grad_cap from "./assets/graduation-cap.svg"
 // 🎯 Allowed Admin Email Constant
 const ADMIN_EMAIL = "s221204@rguktsklm.ac.in";
 

@@ -30,12 +30,48 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     questionsRef.current = questions;
   }, [isSubmitted, userAnswers, questions]);
 
+  // Helper function to extract option questions safely
+  const parseQuestionsData = (examData) => {
+    let qData = [];
+    if (typeof examData.questions === 'string') {
+      try {
+        qData = JSON.parse(examData.questions || '[]');
+      } catch (e) {
+        qData = [];
+      }
+    } else if (Array.isArray(examData.questions)) {
+      qData = examData.questions;
+    }
+    return qData;
+  };
+
   // 1. Fetch Exam Details & Check Previous Attempt
   useEffect(() => {
     const fetchExamData = async () => {
       try {
         setLoading(true);
 
+        // Fetch Exam metadata and questions first so we have questions array for review
+        let examRes;
+        try {
+          examRes = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/${examId}`);
+        } catch (e) {
+          const allRes = await axios.get('https://edutrack-backend-rtoh.onrender.com/api/exams/all');
+          const found = allRes.data.find((e) => String(e.id) === String(examId));
+          examRes = { data: found };
+        }
+
+        const examData = examRes.data;
+        if (examData) {
+          setExam(examData);
+          const qData = parseQuestionsData(examData);
+          setQuestions(qData);
+
+          const durationSeconds = (examData.duration_minutes || 60) * 60;
+          setTimeLeft(durationSeconds);
+        }
+
+        // Check Previous Attempt
         if (user?.id) {
           try {
             const checkRes = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/result/${examId}/${user.id}`);
@@ -46,6 +82,12 @@ const ExamScreen = ({ user, examId, setExamId }) => {
                 totalQuestions: prev.total_questions,
                 percentage: prev.percentage
               });
+
+              // Load user answers if saved in backend response, or fallback to empty object
+              if (prev.userAnswers || prev.user_answers) {
+                setUserAnswers(prev.userAnswers || prev.user_answers || {});
+              }
+              
               setIsSubmitted(true);
               setLoading(false);
               return;
@@ -53,31 +95,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
           } catch (err) {
             console.error('Error checking previous attempt:', err);
           }
-        }
-
-        let res;
-        try {
-          res = await axios.get(`https://edutrack-backend-rtoh.onrender.com/api/exams/${examId}`);
-        } catch (e) {
-          const allRes = await axios.get('https://edutrack-backend-rtoh.onrender.com/api/exams/all');
-          const found = allRes.data.find((e) => String(e.id) === String(examId));
-          res = { data: found };
-        }
-
-        const examData = res.data;
-        if (examData) {
-          setExam(examData);
-          let qData = [];
-          if (typeof examData.questions === 'string') {
-            qData = JSON.parse(examData.questions || '[]');
-          } else if (Array.isArray(examData.questions)) {
-            qData = examData.questions;
-          }
-          setQuestions(qData);
-
-          // Set exam duration if provided (in minutes), else default to 60 mins
-          const durationSeconds = (examData.duration_minutes || 60) * 60;
-          setTimeLeft(durationSeconds);
         }
       } catch (err) {
         console.error('Error loading exam details:', err);
@@ -144,7 +161,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     }
   };
 
-  // 3. ⏱️ 1-Hour Countdown Timer Logic
+  // 3. ⏱️ Countdown Timer Logic
   useEffect(() => {
     if (loading || isSubmitted || !exam) return;
 
@@ -186,7 +203,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     };
   }, [loading, isSubmitted, exam]);
 
-  // Format time (Seconds to MM:SS)
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -200,6 +216,17 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     });
   };
 
+  // Normalization helper for accurate comparison between selections & correct key
+  const normalizeKey = (keyStr) => {
+    if (!keyStr) return '';
+    const clean = String(keyStr).trim().toLowerCase();
+    if (clean.includes('a') && clean.length <= 8) return 'Option A';
+    if (clean.includes('b') && clean.length <= 8) return 'Option B';
+    if (clean.includes('c') && clean.length <= 8) return 'Option C';
+    if (clean.includes('d') && clean.length <= 8) return 'Option D';
+    return keyStr;
+  };
+
   if (loading) {
     return (
       <div className="exam-screen-loading">
@@ -208,15 +235,16 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     );
   }
 
-  // 📊 Statistics Display Screen
+  // 📊 Statistics Display & Answer Review Screen
   if (isSubmitted && stats) {
     const wrongAnswers = Number(stats.totalQuestions) - Number(stats.score);
 
     return (
       <div className="results-card">
         <h2 className="results-title">🎉 Exam Performance Details</h2>
-        <p className="results-subtitle">You have already completed this test. Here are your statistics:</p>
+        <p className="results-subtitle">Here are your statistics and answer key breakdown:</p>
         
+        {/* Score Card Banner */}
         <div className="results-stats-grid">
           <div className="stat-box">
             <span className="stat-box-title">FINAL SCORE</span>
@@ -243,9 +271,106 @@ const ExamScreen = ({ user, examId, setExamId }) => {
           </div>
         </div>
 
+        {/* Detailed Question Review Section */}
+        <div className="review-section" style={{ marginTop: '30px', textAlign: 'left' }}>
+          <h3 style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '10px', marginBottom: '20px' }}>
+            📝 Question Breakdown & Answers
+          </h3>
+
+          {questions.map((q, idx) => {
+            const userChoice = userAnswers[idx];
+            const correctRaw = q.correct_option || q.answer;
+            
+            const normalizedUser = normalizeKey(userChoice);
+            const normalizedCorrect = normalizeKey(correctRaw);
+
+            const optionsMap = [
+              { key: 'Option A', text: q.option_a || q.options?.[0] },
+              { key: 'Option B', text: q.option_b || q.options?.[1] },
+              { key: 'Option C', text: q.option_c || q.options?.[2] },
+              { key: 'Option D', text: q.option_d || q.options?.[3] },
+            ];
+
+            return (
+              <div 
+                key={idx} 
+                className="review-question-card"
+                style={{
+                  background: '#f8fafc',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  marginBottom: '16px',
+                  borderLeft: normalizedUser === normalizedCorrect && userChoice 
+                    ? '5px solid #22c55e' 
+                    : userChoice ? '5px solid #ef4444' : '5px solid #e2e8f0'
+                }}
+              >
+                <h4 style={{ margin: '0 0 12px 0' }}>
+                  Q{idx + 1}. {q.question || q.title}
+                </h4>
+
+                <div className="review-options-list">
+                  {optionsMap.map((opt) => {
+                    if (!opt.text) return null;
+
+                    const isUserChosen = normalizedUser === opt.key || userChoice === opt.text;
+                    const isCorrect = normalizedCorrect === opt.key || correctRaw === opt.text;
+
+                    let optionBg = '#ffffff';
+                    let optionBorder = '1px solid #cbd5e1';
+                    let labelTag = null;
+
+                    if (isCorrect) {
+                      optionBg = '#dcfce7';
+                      optionBorder = '1px solid #22c55e';
+                      labelTag = <span style={{ color: '#15803d', fontWeight: 'bold', marginLeft: '10px' }}>✓ Correct Answer</span>;
+                    }
+
+                    if (isUserChosen && !isCorrect) {
+                      optionBg = '#fee2e2';
+                      optionBorder = '1px solid #ef4444';
+                      labelTag = <span style={{ color: '#b91c1c', fontWeight: 'bold', marginLeft: '10px' }}>✕ Your Choice</span>;
+                    } else if (isUserChosen && isCorrect) {
+                      labelTag = <span style={{ color: '#15803d', fontWeight: 'bold', marginLeft: '10px' }}>✓ Your Choice (Correct)</span>;
+                    }
+
+                    return (
+                      <div
+                        key={opt.key}
+                        style={{
+                          padding: '10px 14px',
+                          margin: '6px 0',
+                          borderRadius: '6px',
+                          background: optionBg,
+                          border: optionBorder,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <div>
+                          <strong>{opt.key}:</strong> {opt.text}
+                        </div>
+                        {labelTag}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {!userChoice && (
+                  <p style={{ color: '#64748b', fontSize: '0.85rem', fontStyle: 'italic', marginTop: '8px' }}>
+                    ⚠️ You did not attempt this question.
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
         <button
           onClick={() => setExamId(null)}
           className="btn-return-dashboard"
+          style={{ marginTop: '20px' }}
         >
           ⬅️ Return to Dashboard
         </button>
@@ -275,7 +400,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
 
   return (
     <div className="exam-container">
-      
       {/* 🚨 Tab Switch Warning Modal */}
       {showWarning && (
         <div className="warning-overlay">
