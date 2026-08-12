@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
+import SecurityCheck from './SecurityCheck';
 
 const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
   const [title, setTitle] = useState('');
@@ -21,7 +22,7 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [generatedCode,setgeneratedCode]=useState('')
   // Fetch Existing Assignments on Load
   const fetchExams = async () => {
     try {
@@ -121,13 +122,16 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
     }
 
     setLoading(true);
+    generateSecurityCode()
 
     const payload = {
       title: title.trim(),
       duration_minutes: parseInt(duration) || 60,
-      questions: questions
+      questions: questions,
+      securityCode : generatedCode
     };
-
+    console.log("=====",payload);
+    
     try {
       await axios.post('http://localhost:3000/api/exams/create', payload);
       setSuccess('Assignment published successfully!');
@@ -155,7 +159,18 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
       setLoading(false);
     }
   };
-
+  const generateSecurityCode = () => {
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
+  
+    for (let i = 0; i < 6; i++) {
+      code += characters.charAt(
+        Math.floor(Math.random() * characters.length)
+      );
+    }
+  
+    setgeneratedCode(code)
+  };
   return (
     <div className="admin-container">
       
@@ -315,7 +330,11 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
 
           <button
             type="button"
-            onClick={handlePublishAssignment}
+            onClick={(e)=>{handlePublishAssignment(e)
+              
+            }
+              
+            }
             disabled={loading}
             className={`btn-publish ${loading ? 'btn-publish-loading' : ''}`}
           >
@@ -350,7 +369,9 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
                     <h4 className="existing-exam-title">{exam.title}</h4>
                     <small className="existing-exam-meta">
                       Duration: {exam.duration_minutes || 60} mins | Questions: {qCount}
+                      <h4>SecurityCode : {exam.securityCode}</h4>
                     </small>
+                    
                   </div>
 
                   <div className="existing-exam-actions">

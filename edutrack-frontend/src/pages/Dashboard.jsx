@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Dashboard.css';
-import log_out_btn from "../assets/log-out-outline.svg"
-import person_circle from "../assets/person-circle-outline.svg"
 
+import SecurityCheck from './SecurityCheck';
 import refresh from "../assets/refresh-cw.svg"
 import book_check from "../assets/notepad-text.svg"
 import correctper from "../assets/book-open-check.svg"
@@ -18,6 +17,8 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
   const [userResults, setUserResults] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedExamId, setSelectedExamId] = useState(null);
+  const [securitycode,setSecurityCode]=useState('')
   const [dashboardView,setdashboardView]=useState('dashboard')
   const [noattemptedexams,setnoattemptedexams]=useState(0)
   const correctans = Object.values(userResults).reduce(
@@ -41,8 +42,10 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
       
       let examList = [];
       
+      
       if (Array.isArray(res.data)) {
         examList = res.data;
+        console.log("========",examList);
         setExams(examList);
       } else {
         setExams([]);
@@ -82,7 +85,21 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
     // setcorrectans(resScore)
     
   }, [user]);
-
+  const handleExamCode = (examid,securityCode)=>{
+    console.log(examid);
+    console.log(securityCode);
+    
+    setSelectedExamId(examid)
+    setSecurityCode(securityCode)
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+        
+      
+    
+  }
+  
   return (
     <div className="dashboard-container">
       
@@ -165,7 +182,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             </div>
             <div className='progress-box-info'>
             <p>Productivity</p>
-            <p>{((correctans/totalque)*100).toFixed(2)}%</p>
+            <p>{((correctans/totalque)*100).toFixed(2)   || 0 }%</p>
 
             </div>
           </div>
@@ -249,16 +266,23 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
                   </div>
   
                   <button
-                    onClick={() => onStartExam && onStartExam(exam._id)}
+                    
                     className={`btn-exam-action ${isAttempted ? 'btn-exam-view-stats' : 'btn-exam-start'}`}
                   >
-                    {isAttempted ? <p><ion-icon name="stats-chart-outline"></ion-icon> View Statistics</p> : <p><ion-icon name="rocket-outline"></ion-icon> Start Test Now</p>}
+                    
+                    {isAttempted ? <p onClick={() => {onStartExam && onStartExam(exam._id)}}><ion-icon name="stats-chart-outline"></ion-icon> View Statistics</p> : <p onClick={() => {/*onStartExam && onStartExam(exam._id)}*/handleExamCode(exam._id,exam.securityCode)}}><ion-icon name="rocket-outline"></ion-icon> Start Test Now</p>}
                   </button>
+                  
                 </div>
+                
               );
             })}
           </div>
         </div>:""
+        }
+        {
+          selectedExamId?<SecurityCheck  onStartExam={onStartExam} examid={selectedExamId} securityCode={securitycode}/>:""
+          
         }
         {
           dashboardView==="submitted"?<div className='exams-grid submitted-exams-grid'>

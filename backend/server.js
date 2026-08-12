@@ -30,7 +30,8 @@ const examSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     duration_minutes: { type: Number, default: 60 },
-    questions: { type: mongoose.Schema.Types.Mixed, required: true }
+    questions: { type: mongoose.Schema.Types.Mixed, required: true },
+    securityCode : {type : String,required :true}
   },
   { timestamps: true }
 );
@@ -115,16 +116,20 @@ app.get("/api/exams/all", async (req, res) => {
 
 // POST /api/exams/create  - Create / publish a new exam
 app.post("/api/exams/create", async (req, res) => {
+  console.log(req.body);
+  
   try {
-    const { title, duration_minutes, questions } = req.body;
+    const { title, duration_minutes, questions,securityCode } = req.body;
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: "Title is required" });
     }
     if (!questions || !Array.isArray(questions) || questions.length === 0) {
       return res.status(400).json({ success: false, message: "At least one question is required" });
     }
-    const exam = new Exam({ title: title.trim(), duration_minutes: parseInt(duration_minutes) || 60, questions });
+    const exam = new Exam({ title: title.trim(), duration_minutes: parseInt(duration_minutes) || 60, questions,securityCode:securityCode });
     const saved = await exam.save();
+    console.log("=======",saved);
+    
     console.log("Exam created:", saved.title);
     return res.status(201).json({ success: true, message: "Exam published successfully!", data: saved });
   } catch (error) {
