@@ -4,7 +4,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ExamScreen from './pages/ExamScreen';
 import LoginScreen from "./pages/Login";
 import './App.css';
-import grad_cap from "./assets/graduation-cap.svg"
+import logo from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/logo.jpeg"
 // 🎯 Allowed Admin Email Constant
 const ADMIN_EMAIL = "s221204@rguktsklm.ac.in";
 
@@ -36,12 +36,10 @@ function App() {
         <div>
          <div className='edutrack-head'>
          <div className='edutrack-icon'>
-            <img src={grad_cap} alt="" />
+            <img src={logo} alt="" />
           </div>
-          <span className="app-title">EduTrack Portal</span>
-          <small className="app-user-info">
-            Logged in as: <strong>{user.name || user.email}</strong> student
-          </small>
+          <span className="app-title">Competitive Exam Cell</span>
+          
          </div>
           
         </div>

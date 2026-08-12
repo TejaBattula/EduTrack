@@ -5,6 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import './Login.css';
 import edutrack_icon from "../assets/graduation-cap.svg"
 import adminSheild from "../assets/user-shield.svg"
+import logo from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/logo.jpeg"
 import AdminDashboard from './AdminDashboard';
 // 👑 Specific Allowed Admin Mails
 const ALLOWED_ADMIN_EMAILS = [
@@ -64,7 +65,7 @@ const Login = ({ setUser }) => {
         body : JSON.stringify(formData)
       })
       const data = await response.json()
-      console.log(data.message);
+      // console.log(data.message);
       
       if (!isRegister) {
         // const userData = { ...res.data.user, role: res.data.user?.role || role };
@@ -78,7 +79,7 @@ const Login = ({ setUser }) => {
       }
       
     } catch (err) {
-      console.log(formData);
+      // console.log(formData);
       setloading(false)
       setError(err.response?.data?.message || 'Something went wrong');
     }
@@ -128,10 +129,10 @@ const Login = ({ setUser }) => {
       <div className="login-card">
         <div>
           <div className='edutrackicon'>
-            <img src={edutrack_icon} alt="" width="20"/>
+            <img src={logo} alt="" width="20"/>
           </div>
         <h1 className="login-title">
-          EduTrack {isRegister ? 'Register' : 'Login'}
+          Competitive Exam Cell {isRegister ? 'Register' : 'Login'}
         </h1>
         
         <p className="login-subtitle">
@@ -231,13 +232,7 @@ const Login = ({ setUser }) => {
             onError={() => setError('Google Sign-In Failed')}
           />
         </div>
-        <div className='admin-btn'>
-            <button onClick={() => setShowAdmin(true)}>
-            Admin <img src={adminSheild} alt="" width="20" />
-          </button>
-
-          
-        </div>
+       
         <p className="login-toggle-link" onClick={() => { setError(''); setIsRegister(!isRegister); }}>
           {isRegister ? <span>Already have an account? <span>Login</span></span> : <span>Don't have an account? <span>Register</span></span>}
         </p>

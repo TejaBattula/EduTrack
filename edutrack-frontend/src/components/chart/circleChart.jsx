@@ -24,18 +24,30 @@ const CircularProgress = ({ percentage, totalMarksObtained, totalMaxMarks }) => 
 
   return (
     <div className="circular-progress-container">
-      <div className="circular-progress-ring-wrapper" style={{ width: radius * 2, height: radius * 2 }}>
+      <div className="circular-progress-ring-wrapper" style={{ width: radius * 2, height: radius * 2 ,}}>
         <svg height={radius * 2} width={radius * 2} className="circular-progress-svg">
           {/* Background circle */}
           <circle
-            stroke="rgba(255,255,255,0.08)"
+            stroke="lightgray"
             fill="transparent"
             strokeWidth={strokeWidth}
             r={normalizedRadius}
             cx={radius}
             cy={radius}
           />
-          {/* Progress ring */}
+          <text
+  x={radius}
+  y={radius}
+  textAnchor="middle"
+  dominantBaseline="middle"
+  fontSize="20"
+  fontWeight="bold"
+  fill="black"
+  transform={`rotate(90 ${radius} ${radius})`}
+>
+  {Number(percentage).toFixed(2)}%
+</text>
+          
           <circle
             stroke={gradeColor}
             fill="transparent"
@@ -50,12 +62,7 @@ const CircularProgress = ({ percentage, totalMarksObtained, totalMaxMarks }) => 
           />
         </svg>
 
-        {/* Inner Label */}
-        <div className="circular-progress-center-label">
-          <span className="circular-progress-percentage">
-            {percentage}%
-          </span>
-        </div>
+        
       </div>
 
       {/* Grade Text & Marks Summary */}

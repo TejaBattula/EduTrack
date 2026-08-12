@@ -47,6 +47,8 @@ const ExamScreen = ({ user, examId, setExamId }) => {
 
   // 1. Fetch Exam Details & Check Previous Attempt
   useEffect(() => {
+    
+    
     const fetchExamData = async () => {
       try {
         setLoading(true);
@@ -72,9 +74,14 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         }
 
         // Check Previous Attempt
-        if (user?.id) {
+        if (user?._id) {
           try {
-            const checkRes = await axios.get(`http://localhost:3000/api/exams/result/${examId}/${user.id}`);
+            const checkRes = await axios.get(
+              `http://localhost:3000/api/exams/result/${examId}/${user._id}`
+            );
+        
+        
+            
             if (checkRes.data.attempted) {
               const prev = checkRes.data.result;
               setStats({
@@ -105,6 +112,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
 
     if (examId) {
       fetchExamData();
+      
     }
   }, [examId, user]);
 
@@ -134,7 +142,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         questions: currentQuestions
       };
   
-      console.log("Submitting payload:", payload);
   
       const response = await fetch(
         "http://localhost:3000/submitexam",
@@ -149,7 +156,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
   
       const data = await response.json();
   
-      console.log("Submit response:", data);
+      
   
       if (!response.ok) {
         throw new Error(data.message || "Failed to submit exam");
@@ -280,6 +287,8 @@ const ExamScreen = ({ user, examId, setExamId }) => {
   }
 
   // 📊 Statistics Display & Answer Review Screen
+  console.log("Statistics Display & Answer Review Screen",isSubmitted&&stats);
+  
   if (isSubmitted && stats) {
     const wrongAnswers = Number(stats.totalQuestions) - Number(stats.score);
 

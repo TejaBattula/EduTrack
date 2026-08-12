@@ -50,7 +50,7 @@ const examSubmissionSchema = new mongoose.Schema(
     percentage: { type: Number, default: 0 }
   },
   { timestamps: true }
-);
+)
 
 const User = mongoose.model("Users", contactSchema);
 const Exam = mongoose.model("Exam", examSchema);
@@ -149,8 +149,10 @@ app.delete("/api/exams/delete/:id", async (req, res) => {
 
 // GET /api/exams/result/:examId/:userId  - Check if user attempted an exam
 app.get("/api/exams/result/:examId/:userId", async (req, res) => {
+   const { examId, userId } = req.params;
+  console.log(examId,userId);
+  
   try {
-    const { examId, userId } = req.params;
     const submission = await ExamSubmission.findOne({
       examId: String(examId),
       userId: String(userId)
@@ -159,7 +161,8 @@ app.get("/api/exams/result/:examId/:userId", async (req, res) => {
     if (!submission) {
       return res.status(200).json({ success: true, attempted: false, message: "Exam not attempted" });
     }
-
+    
+    
     return res.status(200).json({
       success: true,
       attempted: true,

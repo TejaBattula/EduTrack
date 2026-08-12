@@ -3,16 +3,14 @@ import axios from 'axios';
 import './Dashboard.css';
 import log_out_btn from "../assets/log-out-outline.svg"
 import person_circle from "../assets/person-circle-outline.svg"
-import book from "../assets/book-open-text.svg"
-import send from "../assets/send.svg"
-import profile from "../assets/user-shield.svg"
-import layout_dashboard from "../assets/layout-dashboard.svg"
+
 import refresh from "../assets/refresh-cw.svg"
 import book_check from "../assets/notepad-text.svg"
 import correctper from "../assets/book-open-check.svg"
 import wrongper from "../assets/circle-x.svg"
 import productper from "../assets/square-dashed-kanban.svg"
 import CircularProgress from '../components/chart/circleChart';
+import logo from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/logo.jpeg"
 const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
   console.log("dashboard",user);
   
@@ -22,8 +20,19 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
   const [error, setError] = useState('');
   const [dashboardView,setdashboardView]=useState('dashboard')
   const [noattemptedexams,setnoattemptedexams]=useState(0)
-  const [correctans,setcorrectans]=useState(0)
-
+  const correctans = Object.values(userResults).reduce(
+    (total, result) => total + result.score,
+    0
+  );
+  const totalque = Object.values(userResults).reduce(
+    (total, result) => total + result.total_questions,
+    0
+  );
+  
+  const percentage = totalque > 0
+    ? (correctans / totalque) * 100
+    : 0;
+  
   // Fetch Exams and User Attempt Results from Backend
   const fetchExams = async () => {
     try {
@@ -31,13 +40,14 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
       const res = await axios.get('http://localhost:3000/api/exams/all');
       
       let examList = [];
+      
       if (Array.isArray(res.data)) {
         examList = res.data;
         setExams(examList);
       } else {
         setExams([]);
       }
-
+      
       // Check user results for each exam if user is logged in
       if (user?._id && examList.length > 0) {
         const resultsMap = {};
@@ -46,12 +56,15 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             const checkRes = await axios.get(`http://localhost:3000/api/exams/result/${exam.id}/${user._id}`);
             if (checkRes.data.attempted) {
               resultsMap[exam.id] = checkRes.data.result;
+              
             }
           } catch (e) {
             console.error(`Error fetching attempt for exam ${exam.id}:`, e);
           }
         }
         setUserResults(resultsMap);
+        
+        setnoattemptedexams(Object.keys(resultsMap).length)
       }
 
       setError('');
@@ -62,10 +75,11 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
       setLoading(false);
     }
   };
-
+  
   useEffect(() => {
     fetchExams();
-    console.log(userResults);
+    // setnoattemptedexams(count)
+    // setcorrectans(resScore)
     
   }, [user]);
 
@@ -79,40 +93,29 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
       {/* Main Banner */}
       <div className={dashboardView==="dashboard"?'dashboard-item active':'dashboard-item'} onClick={()=>{setdashboardView("dashboard")}}>
         <h4>Dashboard</h4>
-        <img src={layout_dashboard} alt="" />
+        <ion-icon name="grid-outline"></ion-icon>
       </div>
       <div className={dashboardView==="exams"?'dashboard-item active':'dashboard-item'} onClick={()=>{setdashboardView("exams")}}>
         <h4>Exams</h4>
-        <img src={book}alt="" />
+        <ion-icon name="book-outline"></ion-icon>
       </div>
       <div className={dashboardView==="submitted"?'dashboard-item active':'dashboard-item'} onClick={()=>{setdashboardView("submitted")}}>
         <h4>Submitted</h4>
-        <img src={send} alt="" />
+        <ion-icon name="paper-plane-outline"></ion-icon>
       </div>
       
       <div className={dashboardView==="myprofile"?'dashboard-item active':'dashboard-item'} onClick={()=>{setdashboardView("myprofile")}}>
         <h4>My Profile</h4>
-        <img src={profile} alt="" />
+        <ion-icon name="person-circle-outline"></ion-icon>
       </div>
-      <div className="dashboard-banner">
-        <div>
-          <p className="banner-title">EduTrack - CEC Portal</p>
-          
-        </div>
-        <button 
-          onClick={fetchExams}
-          className="btn-refresh"
-        >
-          <img src={refresh} alt="" />
-        </button>
-      </div>
+      
       <div className="dashboard-user-profile">
-        <img className='person_circle' src={person_circle} alt="" />
+      <ion-icon name="person-outline"></ion-icon>
         <div>
           <h4>{user.name}</h4>
           <p className='profile-email-show'>{user.email}</p>
         </div>
-        <img className='log-ou-btn' src={log_out_btn} alt="" />
+        <ion-icon name="log-out-outline"></ion-icon>
       </div>
       </div>
 
@@ -129,7 +132,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             </div>
             <div className='progress-box-info'>
             <p>Attempted exams</p>
-            <p>0%</p>
+            <p>{noattemptedexams}</p>
             </div>
           </div>
           
@@ -140,7 +143,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             </div>
             <div className='progress-box-info'>
             <p>Correct answers</p>
-            <p>0%</p>
+            <p>{correctans}</p>
 
             </div>
           </div>
@@ -151,7 +154,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             </div>
             <div className='progress-box-info'>
             <p>Wrong answers</p>
-            <p>0%</p>
+            <p>{totalque-correctans}</p>
 
             </div>
           </div>
@@ -167,10 +170,8 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             </div>
           </div>
           </div>
-          <CircularProgress percentage={0} totalMarksObtained={0} totalMaxMarks={exams.length}/>
-          {/* <CircularProgress totalsubmittedexams={exams.length}/>
-          <CircularProgress totalsubmittedexams={exams.length}/> */}
-
+          <CircularProgress percentage={percentage} totalMarksObtained={correctans} totalMaxMarks={totalque}/>
+          
         </div>:""
         }
         
@@ -178,6 +179,18 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
           dashboardView==="dashboard" || dashboardView==="exams"?<div>
           <h3 className="section-title">
             Competitive Education Cell (CEC) Active Tests
+            <div className="dashboard-banner">
+            <div>
+              <p className="banner-title">Refresh</p>
+              
+            </div>
+            <button 
+              onClick={fetchExams}
+              className="btn-refresh"
+            >
+              <img src={refresh} alt="" />
+            </button>
+          </div>
           </h3>
   
           {loading && <p className="status-loading">Loading available exams...</p>}
@@ -205,6 +218,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
               const isAttempted = !!result;
               
               
+              
               return (
                 <div 
                   key={exam.id} 
@@ -215,31 +229,30 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
                       <h4 className="exam-card-title">{exam.title}</h4>
                       {isAttempted && (
                         <span className="badge-completed">
-                          ✅ Completed
+                          Completed
                         </span>
                       )}
                     </div>
   
                     <div className="exam-info">
-                      <p className="exam-info-text">⏱️ Duration: <b>{exam.duration_minutes || 60} mins</b></p>
-                      <p className="exam-info-text">❓ Questions: <b>{parsedQuestions.length} Questions</b></p>
+                      <p className="exam-info-text"><ion-icon name="stopwatch-outline"></ion-icon> Duration: <b>{exam.duration_minutes || 60} mins</b></p>
+                      <p className="exam-info-text"><ion-icon name="help-circle-outline"></ion-icon> Questions: <b>{parsedQuestions.length} Questions</b></p>
                       
                       {/* Display Attempt Score Status */}
                       {isAttempted && (
                         <p className="score-badge">
-                          {console.log(result.score)
-                          }
-                          🎯 Score: {result.score} / {result.total_questions} ({result.percentage}%)
+                          
+                          <ion-icon name="disc-outline"></ion-icon> Score: {result.score} / {result.total_questions} ({result.percentage}%)
                         </p>
                       )}
                     </div>
                   </div>
   
                   <button
-                    onClick={() => onStartExam && onStartExam(exam.id || exam)}
+                    onClick={() => onStartExam && onStartExam(exam._id)}
                     className={`btn-exam-action ${isAttempted ? 'btn-exam-view-stats' : 'btn-exam-start'}`}
                   >
-                    {isAttempted ? '📊 View Statistics' : '🚀 Start Test Now'}
+                    {isAttempted ? <p><ion-icon name="stats-chart-outline"></ion-icon> View Statistics</p> : <p><ion-icon name="rocket-outline"></ion-icon> Start Test Now</p>}
                   </button>
                 </div>
               );
@@ -254,8 +267,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
     
             <img
               src={
-                user.profileImage ||
-                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`
+                logo
               }
               alt={user.name}
               className="user-details-avatar"

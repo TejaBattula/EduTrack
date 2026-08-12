@@ -14,15 +14,15 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  color: white;
   padding-top: 10px;
-  background-color: #212833;
+  background-color: whitesmoke;
   padding: 10px;
   position: fixed;
+  border: 1px solid rgba(49, 41, 41, 0.315);
   
 }
 .dashboard-item{
-  border: 1px solid rgba(255, 255, 255, 0.315);
+  border: 1px solid rgba(49, 41, 41, 0.315);
   padding: 15px;
   border-radius: 10px;
   display: flex;
@@ -32,6 +32,10 @@
   box-shadow: 0px 0px 0px gray;
   opacity: 0.7;
   transition: box-shadow 0.2s ease-in-out;
+  
+}
+.dashboard-item ion-icon{
+  font-size: 25px;
 }
 .dashboard-item:hover{
   box-shadow: 0px 0px 7px rgb(182, 179, 179);
@@ -39,9 +43,11 @@
 }
 .dashboard-item.active{
   box-shadow: 0px 0px 7px rgb(179, 181, 182);
-  background-color: #121a2b;
+  background-color: #6b0000;
   opacity: 1;
+  color: white;
 }
+
 p,h1,h2,h3,h4,h5,h6{
   margin: 0px;
   padding: 0px;
@@ -59,8 +65,8 @@ p,h1,h2,h3,h4,h5,h6{
   padding: 15px;
   box-sizing: border-box;
   
-  background-color: #9ff1bd;
-  color: green;
+  background-color: #6b0000;
+  color: white;
 
 }
 .profile-email-show{
@@ -114,12 +120,16 @@ p,h1,h2,h3,h4,h5,h6{
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
   border: 1px solid rgba(255, 255, 255, 0.178);
+  height: 20px;
 }
+
 
 .banner-title {
   /* margin: 0 0 10px 0; */
   font-size: 15px;
+  
 }
 
 .banner-desc {
@@ -128,19 +138,16 @@ p,h1,h2,h3,h4,h5,h6{
 }
 
 .btn-refresh {
-  background-color: #475569;
-  color: #fff;
+  background-color: #1e293b;
+  outline: none;
   border: none;
-  padding: 8px 15px;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
   transition: background-color 0.2s ease;
 }
 
-.btn-refresh:hover {
-  background-color: #334155;
-}
+
 
 .exams-section {
   position: absolute;
@@ -165,6 +172,8 @@ p,h1,h2,h3,h4,h5,h6{
   border-bottom: 2px solid #e2e8f0;
   padding-bottom: 10px;
   margin-top: 0;
+  display: flex;
+  justify-content: space-between;
 }
 
 .status-loading {
@@ -301,8 +310,8 @@ p,h1,h2,h3,h4,h5,h6{
 .btn-exam-view-stats:hover {
   background-color: #334155;
 }
-.dashboard-user-profile img{
-  width: 30px;
+.dashboard-user-profile ion-icon{
+  font-size: 25px;
 }
 
 .user-details-card {
@@ -365,18 +374,19 @@ p,h1,h2,h3,h4,h5,h6{
   justify-content: space-between;
   align-items: center;
   padding: 14px 16px;
-  background: #f8fafc;
+  background:whitesmoke;
   border-radius: 10px;
 }
 
 .detail-label {
-  color: #64748b;
+  color: #3c4655;
   font-size: 14px;
   font-weight: 500;
 }
 
 .detail-value {
   color: #1e293b;
+  
   font-size: 15px;
   font-weight: 600;
 }
