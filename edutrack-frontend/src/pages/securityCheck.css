@@ -10,7 +10,7 @@
 .security-card{
     background-color: white;
     width: 400px;
-    height: 300px;
+    height: auto;
     box-shadow: 0px 0px 10px rgb(201, 193, 193);
     border-radius: 10px;
     display: flex;
@@ -50,4 +50,11 @@
 .security-card ion-icon:hover{
     background-color: rgba(128, 128, 128, 0.37);
     border-radius: 50%;
+}
+.code-error{
+    padding: 10px;
+    border: 1px solid red;
+    background-color: rgba(255, 0, 0, 0.144);
+    color: red;
+    border-radius: 5px;
 }

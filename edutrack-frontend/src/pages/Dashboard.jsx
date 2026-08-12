@@ -16,6 +16,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
   const [exams, setExams] = useState([]);
   const [userResults, setUserResults] = useState({});
   const [loading, setLoading] = useState(true);
+  
   const [error, setError] = useState('');
   const [selectedExamId, setSelectedExamId] = useState(null);
   const [securitycode,setSecurityCode]=useState('')
@@ -127,12 +128,12 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
       </div>
       
       <div className="dashboard-user-profile">
-      <ion-icon name="person-outline"></ion-icon>
+      <ion-icon name="person-outline" onClick={()=>{setdashboardView("myprofile")}}></ion-icon>
         <div>
           <h4>{user.name}</h4>
           <p className='profile-email-show'>{user.email}</p>
         </div>
-        <ion-icon name="log-out-outline"></ion-icon>
+        <ion-icon name="log-out-outline" onClick={()=>{onLogout()}}></ion-icon>
       </div>
       </div>
 
@@ -210,7 +211,9 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
           </div>
           </h3>
   
-          {loading && <p className="status-loading">Loading available exams...</p>}
+          {loading?<div className='loading-animation'>
+            <div className='loading-content'><p className="status-loading"></p>Please wait</div>
+          </div>:""}
           {error && <p className="status-error">{error}</p>}
   
           {!loading && !error && exams.length === 0 && (
@@ -371,6 +374,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
               }
               alt={user.name}
               className="user-details-avatar"
+              
             />
     
             <h2>{user.name}</h2>
