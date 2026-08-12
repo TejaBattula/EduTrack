@@ -1,6 +1,6 @@
 import { useState } from "react";
 import './securityCheck.css'
-const SecurityCheck = ({ secCode, onStartExam, examid ,securityCode}) => {
+const SecurityCheck = ({ secCode, onStartExam, examid ,securityCode,setSelectedExamId,setSecurityCode}) => {
     const [security,setSecurity]=useState('')
     const handleStart = () => {
         console.log(securityCode);
@@ -17,6 +17,9 @@ const SecurityCheck = ({ secCode, onStartExam, examid ,securityCode}) => {
     return (
      <div className="security-page">
          <div className="security-card">
+         <ion-icon name="close-outline" onClick={()=>{setSelectedExamId('')
+          setSecurityCode('')
+         }}></ion-icon>
         <h2>Security Check</h2>
   
         <p>Enter the security code: {secCode}</p>

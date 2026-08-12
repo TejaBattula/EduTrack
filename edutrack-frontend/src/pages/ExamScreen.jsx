@@ -241,7 +241,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
           if (newCount === 1) {
             setShowWarning(true);
           } else if (newCount >= 2) {
-            handleSubmitExam(true, '🚨 You switched tabs again! Exam is automatically submitted due to violation.');
+            handleSubmitExam(true, ' You switched tabs again! Exam is automatically submitted due to violation.');
           }
           return newCount;
         });
@@ -516,7 +516,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
           onClick={() => setCurrentQIndex((prev) => prev - 1)}
           className="btn-nav-prev"
         >
-          ⬅️ Previous
+           Previous
         </button>
 
         {currentQIndex === questions.length - 1 ? (
@@ -525,7 +525,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
             disabled={submitting}
             className={`btn-submit-exam ${submitting ? 'btn-submitting' : ''}`}
           >
-            {submitting ? 'Submitting...' : '✅ Submit Test'}
+            {submitting ? 'Submitting...' : ' Submit Test'}
           </button>
         ) : (
           <button

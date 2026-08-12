@@ -270,7 +270,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
                     className={`btn-exam-action ${isAttempted ? 'btn-exam-view-stats' : 'btn-exam-start'}`}
                   >
                     
-                    {isAttempted ? <p onClick={() => {onStartExam && onStartExam(exam._id)}}><ion-icon name="stats-chart-outline"></ion-icon> View Statistics</p> : <p onClick={() => {/*onStartExam && onStartExam(exam._id)}*/handleExamCode(exam._id,exam.securityCode)}}><ion-icon name="rocket-outline"></ion-icon> Start Test Now</p>}
+                    {isAttempted ? <p onClick={() => {onStartExam && onStartExam(exam._id)}}><ion-icon name="stats-chart-outline"></ion-icon> View Statistics</p> : <p onClick={() => {handleExamCode(exam._id,exam.securityCode)}}><ion-icon name="rocket-outline"></ion-icon> Start Test Now</p>}
                   </button>
                   
                 </div>
@@ -281,7 +281,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
         </div>:""
         }
         {
-          selectedExamId?<SecurityCheck  onStartExam={onStartExam} examid={selectedExamId} securityCode={securitycode}/>:""
+          selectedExamId?<SecurityCheck  onStartExam={onStartExam} examid={selectedExamId} securityCode={securitycode} setSelectedExamId={setSelectedExamId} setSecurityCode={setSecurityCode}/>:""
           
         }
         {

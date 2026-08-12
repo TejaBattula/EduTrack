@@ -122,13 +122,13 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
     }
 
     setLoading(true);
-    generateSecurityCode()
+    let newcode=generateSecurityCode()
 
     const payload = {
       title: title.trim(),
       duration_minutes: parseInt(duration) || 60,
       questions: questions,
-      securityCode : generatedCode
+      securityCode : newcode
     };
     console.log("=====",payload);
     
@@ -170,6 +170,7 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
     }
   
     setgeneratedCode(code)
+    return code
   };
   return (
     <div className="admin-container">
