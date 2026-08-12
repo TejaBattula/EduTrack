@@ -165,7 +165,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             </div>
             <div className='progress-box-info'>
             <p>Productivity</p>
-            <p>0%</p>
+            <p>{((correctans/totalque)*100).toFixed(2)}%</p>
 
             </div>
           </div>
@@ -259,6 +259,82 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
             })}
           </div>
         </div>:""
+        }
+        {
+          dashboardView==="submitted"?<div className='exams-grid submitted-exams-grid'>
+            <h3 className="section-title">
+            Competitive Education Cell (CEC) Submitted Tests
+            <div className="dashboard-banner">
+            <div>
+              <p className="banner-title">Refresh</p>
+              
+            </div>
+            <button 
+              onClick={fetchExams}
+              className="btn-refresh"
+            >
+              <img src={refresh} alt="" />
+            </button>
+          </div>
+          </h3>
+            <div className='submitted-exam-items'>
+            {exams.map((exam) => {
+              let parsedQuestions = [];
+              try {
+                parsedQuestions = Array.isArray(exam.questions) 
+                  ? exam.questions 
+                  : JSON.parse(exam.questions || '[]');
+              } catch (e) {
+                parsedQuestions = [];
+              }
+  
+              const result = userResults[exam.id];
+              const isAttempted = !!result;
+              if(isAttempted){
+                return (
+                  <div 
+                    key={exam.id} 
+                    className={`exam-card ${isAttempted ? 'exam-card-attempted ' : ''}`}
+                  >
+                    <div>
+                      <div className="exam-card-header">
+                        <h4 className="exam-card-title">{exam.title}</h4>
+                        {isAttempted && (
+                          <span className="badge-completed">
+                            Completed
+                          </span>
+                        )}
+                      </div>
+    
+                      <div className="exam-info">
+                        <p className="exam-info-text"><ion-icon name="stopwatch-outline"></ion-icon> Duration: <b>{exam.duration_minutes || 60} mins</b></p>
+                        <p className="exam-info-text"><ion-icon name="help-circle-outline"></ion-icon> Questions: <b>{parsedQuestions.length} Questions</b></p>
+                        
+                        {/* Display Attempt Score Status */}
+                        {isAttempted && (
+                          <p className="score-badge">
+                            
+                            <ion-icon name="disc-outline"></ion-icon> Score: {result.score} / {result.total_questions} ({result.percentage}%)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+    
+                    <button
+                      onClick={() => onStartExam && onStartExam(exam._id)}
+                      className={`btn-exam-action ${isAttempted ? 'btn-exam-view-stats' : 'btn-exam-start'}`}
+                    >
+                      {isAttempted ? <p><ion-icon name="stats-chart-outline"></ion-icon> View Statistics</p> : <p><ion-icon name="rocket-outline"></ion-icon> Start Test Now</p>}
+                    </button>
+                  </div>
+                );
+              }
+              
+              
+              
+            })}
+            </div>
+          </div>:""
         }
         {
           dashboardView==="myprofile"?<div className="user-details-card">

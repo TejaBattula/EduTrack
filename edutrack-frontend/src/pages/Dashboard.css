@@ -390,7 +390,15 @@ p,h1,h2,h3,h4,h5,h6{
   font-size: 15px;
   font-weight: 600;
 }
-
+.submitted-exams-grid{
+  display: flex;
+  flex-direction: column;
+}
+.submitted-exam-items{
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 20px;
+}
 @media (max-width: 600px) {
   .user-details-card {
     padding: 20px;

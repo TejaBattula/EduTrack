@@ -52,7 +52,7 @@ function App() {
             }}
             className={`btn-nav ${user.role === 'student' && !activeExamId ? 'btn-nav-active' : ''}`}
           >
-            🎓 Student Dashboard
+            Student Dashboard
           </button>
 
           {/* 🔒 Show Admin Panel Button ONLY if logged in email is s221204@rguktsklm.ac.in */}
@@ -64,7 +64,7 @@ function App() {
               }}
               className={`btn-nav ${user.role === 'admin' ? 'btn-admin-active' : ''}`}
             >
-              ⚙️ Admin Panel
+               Admin Panel
             </button>
           )}
 

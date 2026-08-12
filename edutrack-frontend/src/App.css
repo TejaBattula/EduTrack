@@ -49,8 +49,9 @@
   border: none;
   cursor: pointer;
   font-weight: bold;
-  background-color: #334155;
+  background-color: #b42e2e;
   color: #fff;
+  font-weight: 400;
   transition: background-color 0.2s ease;
 }
 
@@ -58,9 +59,7 @@
   opacity: 0.9;
 }
 
-.btn-nav-active {
-  background-color: #2563eb;
-}
+
 
 .btn-admin-active {
   background-color: #6366f1;

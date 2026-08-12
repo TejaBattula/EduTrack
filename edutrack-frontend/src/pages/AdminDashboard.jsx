@@ -319,7 +319,7 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
             disabled={loading}
             className={`btn-publish ${loading ? 'btn-publish-loading' : ''}`}
           >
-            {loading ? 'Publishing...' : '🏷️ Publish Assignment'}
+            {loading ? 'Publishing...' : <p style={{display:"flex",gap:"10px"}}><ion-icon name="arrow-up-right-box-outline"></ion-icon>Publish Assignment</p>}
           </button>
         </div>
       </div>
