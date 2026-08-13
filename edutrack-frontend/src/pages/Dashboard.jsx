@@ -9,7 +9,7 @@ import correctper from "../assets/book-open-check.svg"
 import wrongper from "../assets/circle-x.svg"
 import productper from "../assets/square-dashed-kanban.svg"
 import CircularProgress from '../components/chart/circleChart';
-import logo from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/logo.jpeg"
+import logo from "../assets/logo.jpeg"
 const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
   console.log("dashboard",user);
   
