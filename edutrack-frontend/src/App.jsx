@@ -6,7 +6,7 @@ import LoginScreen from "./pages/Login";
 import './App.css';
 import user_sheild from "./assets/shield-user.svg"
 import logo from "./assets/logo.jpeg";
-const ADMIN_EMAIL = "s221204@rguktsklm.ac.in";
+const ADMIN_EMAIL = "s221204@rguktsklm.ac.in"  || "s221149@rguktsklm.ac.in" || "coordinator_hc@rguktsklm.ac.in" || "s220261@rguktsklm.ac.in";
 
 function App() {
   const [user, setUser] = useState(null); 

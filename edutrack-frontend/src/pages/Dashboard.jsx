@@ -46,13 +46,11 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
       
       if (Array.isArray(res.data)) {
         examList = res.data;
-        console.log("========",examList);
         setExams(examList);
       } else {
         setExams([]);
       }
       
-      // Check user results for each exam if user is logged in
       if (user?._id && examList.length > 0) {
         const resultsMap = {};
         for (let exam of examList) {
@@ -82,13 +80,9 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
   
   useEffect(() => {
     fetchExams();
-    // setnoattemptedexams(count)
-    // setcorrectans(resScore)
     
   }, [user]);
   const handleExamCode = (examid,securityCode)=>{
-    console.log(examid);
-    console.log(securityCode);
     
     setSelectedExamId(examid)
     setSecurityCode(securityCode)
@@ -104,11 +98,9 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
   return (
     <div className="dashboard-container">
       
-      {/* Top Navbar */}
       <div className={navbar===true?'dashboard-left navbar':'dashboard-left'}>
       
 
-      {/* Main Banner */}
       <div className={dashboardView==="dashboard"?'dashboard-item active':'dashboard-item'} onClick={()=>{setdashboardView("dashboard")}}>
         <h4>Dashboard</h4>
         <ion-icon name="grid-outline"></ion-icon>
@@ -137,7 +129,6 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
       </div>
       </div>
 
-      {/* Exams Section */}
       <div className="exams-section">
         {
           dashboardView=="dashboard"?<div className="student-progress">
@@ -222,7 +213,6 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
             </p>
           )}
   
-          {/* Exams Grid */}
           <div className="exams-grid">
             {exams.map((exam) => {
               let parsedQuestions = [];
@@ -258,7 +248,6 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
                       <p className="exam-info-text"><ion-icon name="stopwatch-outline"></ion-icon> Duration: <b>{exam.duration_minutes || 60} mins</b></p>
                       <p className="exam-info-text"><ion-icon name="help-circle-outline"></ion-icon> Questions: <b>{parsedQuestions.length} Questions</b></p>
                       
-                      {/* Display Attempt Score Status */}
                       {isAttempted && (
                         <p className="score-badge">
                           

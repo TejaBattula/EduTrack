@@ -12,14 +12,11 @@ const ExamScreen = ({ user, examId, setExamId }) => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [stats, setStats] = useState(null);
 
-  // ⏱️ Timer State (Default: 60 mins = 3600 seconds)
   const [timeLeft, setTimeLeft] = useState(3600);
   
-  // 🚨 Warning State for Tab Switch
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
   const [showWarning, setShowWarning] = useState(false);
 
-  // UseRef to maintain latest state inside event listeners
   const isSubmittedRef = useRef(isSubmitted);
   const userAnswersRef = useRef(userAnswers);
   const questionsRef = useRef(questions);
@@ -30,7 +27,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     questionsRef.current = questions;
   }, [isSubmitted, userAnswers, questions]);
 
-  // Helper function to extract option questions safely
   const parseQuestionsData = (examData) => {
     let qData = [];
     if (typeof examData.questions === 'string') {
@@ -45,7 +41,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     return qData;
   };
 
-  // 1. Fetch Exam Details & Check Previous Attempt
   useEffect(() => {
     
     
@@ -53,7 +48,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
       try {
         setLoading(true);
 
-        // Fetch Exam metadata and questions first so we have questions array for review
         let examRes;
         try {
           examRes = await axios.get(`https://edutrack-cgpn.onrender.com/api/exams/${examId}`);
@@ -90,7 +84,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
                 percentage: prev.percentage
               });
 
-              // Load user answers if saved in backend response, or fallback to empty object
               if (prev.userAnswers || prev.user_answers) {
                 setUserAnswers(prev.userAnswers || prev.user_answers || {});
               }
@@ -116,7 +109,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     }
   }, [examId, user]);
 
-  // 2. Submit Exam Function
   const handleSubmitExam = async (isAutoSubmit = false, reason = '') => {
     if (submitting || isSubmittedRef.current) return;
   
@@ -162,7 +154,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         throw new Error(data.message || "Failed to submit exam");
       }
   
-      // Backend calculated statistics
       if (data.data?.stats) {
         setStats({
           score: data.data.stats.score,
@@ -170,7 +161,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
           percentage: data.data.stats.percentage
         });
       } else {
-        // Fallback calculation
         let calculatedScore = 0;
   
         currentQuestions.forEach((q, index) => {

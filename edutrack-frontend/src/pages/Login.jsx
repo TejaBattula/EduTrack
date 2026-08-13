@@ -7,11 +7,9 @@ import edutrack_icon from "../assets/graduation-cap.svg"
 import adminSheild from "../assets/user-shield.svg"
 import logo from "../assets/logo.jpeg"
 import AdminDashboard from './AdminDashboard';
-// 👑 Specific Allowed Admin Mails
 const ALLOWED_ADMIN_EMAILS = [
-  // Nee Admin Email ikkada undali
-  'admin@rguktsklm.ac.in',
-  'director@rguktsklm.ac.in'
+  
+  "s221204@rguktsklm.ac.in","s221149@rguktsklm.ac.in","coordinator_hc@rguktsklm.ac.in","s220261@rguktsklm.ac.in"
 ];
 
 const ALLOWED_DOMAIN = 'rguktsklm.ac.in';
@@ -42,7 +40,6 @@ const Login = ({ setUser }) => {
     e.preventDefault();
     setError('');
     setloading(true)
-    console.log(formData);
     
     // 1. Email Domain Check
     const role = validateAndGetRole(formData.email);
@@ -65,12 +62,9 @@ const Login = ({ setUser }) => {
         body : JSON.stringify(formData)
       })
       const data = await response.json()
-      // console.log(data.message);
       
       if (!isRegister) {
-        // const userData = { ...res.data.user, role: res.data.user?.role || role };
-        // localStorage.setItem('user', JSON.stringify(userData));
-        // localStorage.setItem('token', res.data.token);
+       
         setUser(data.data);
 
       } else {
@@ -79,33 +73,29 @@ const Login = ({ setUser }) => {
       }
       
     } catch (err) {
-      // console.log(formData);
       setloading(false)
       setError(err.response?.data?.message || 'Something went wrong');
     }
     setloading(false)
   };
 
-  // Official Google Login Success
   const handleGoogleSuccess = (credentialResponse) => {
     try {
       const decodedUser = jwtDecode(credentialResponse.credential);
       const userEmail = decodedUser.email;
 
-      // 1. Check if email ends with @rguktsklm.ac.in
       const role = validateAndGetRole(userEmail);
       if (!role) {
         setError(`Access Denied! Only @${ALLOWED_DOMAIN} Google accounts are allowed.`);
         return;
       }
 
-      // 2. Prepare User Object with Role
       const realGoogleUser = {
         id: decodedUser.sub,
         name: decodedUser.name,
         email: userEmail,
         picture: decodedUser.picture,
-        role: role // 'admin' or 'student'
+        role: role 
       };
 
       localStorage.setItem('user', JSON.stringify(realGoogleUser));
