@@ -449,7 +449,7 @@ p,h1,h2,h3,h4,h5,h6{
     transition: left 0.3s ease-in-out;
     position: fixed;
     overflow-y: hidden;
-    height: 88vh;
+    height: 85vh;
     z-index: 10000;
   }
   .dashboard-left.navbar{
@@ -493,7 +493,7 @@ p,h1,h2,h3,h4,h5,h6{
     gap: 10px;
   }
   .student-progress-box div{
-    width: 140px;
+    width: 170px;
   }
   .submitted-exam-items{
     display: grid;
