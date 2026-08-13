@@ -58,3 +58,14 @@
     color: red;
     border-radius: 5px;
 }
+@media screen and (max-width : 679px){
+    .security-page{
+        width: 100%;
+    }
+    .security-card{
+        
+        top: 5%;
+        width: 90%;
+        left: 20px;
+    }
+}

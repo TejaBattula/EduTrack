@@ -10,7 +10,7 @@ import wrongper from "../assets/circle-x.svg"
 import productper from "../assets/square-dashed-kanban.svg"
 import CircularProgress from '../components/chart/circleChart';
 import logo from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/logo.jpeg"
-const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
+const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
   console.log("dashboard",user);
   
   const [exams, setExams] = useState([]);
@@ -105,7 +105,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout }) => {
     <div className="dashboard-container">
       
       {/* Top Navbar */}
-      <div className='dashboard-left'>
+      <div className={navbar===true?'dashboard-left navbar':'dashboard-left'}>
       
 
       {/* Main Banner */}

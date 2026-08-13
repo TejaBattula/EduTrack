@@ -74,3 +74,25 @@
 .btn-logout:hover {
   background-color: #dc2626;
 }
+.edutrack-head ion-icon{
+  font-size: 30px;
+  display: none;
+  font-weight: 800;
+}
+@media screen and (max-width : 679px) {
+  
+  .edutrack-head ion-icon{
+    display: block;
+    font-size: 40px;
+  }
+  
+  .app-nav-buttons ion-icon{
+    font-size: 25px;
+    padding: 5px;
+
+  }
+  .app-nav-buttons ion-icon:hover{
+    background-color: #ce6e6e;
+    border-radius: 50%;
+  }
+}

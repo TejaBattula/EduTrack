@@ -4,13 +4,14 @@ import AdminDashboard from './pages/AdminDashboard';
 import ExamScreen from './pages/ExamScreen';
 import LoginScreen from "./pages/Login";
 import './App.css';
+import user_sheild from "./assets/shield-user.svg"
 import logo from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/logo.jpeg"
 const ADMIN_EMAIL = "s221204@rguktsklm.ac.in";
 
 function App() {
   const [user, setUser] = useState(null); 
   const [activeExamId, setActiveExamId] = useState(null);
-
+  const [navbar,setNavbar]=useState(false)
   if (!user) {
     return <LoginScreen setUser={setUser} />;
   }
@@ -28,6 +29,9 @@ function App() {
       <div className="app-navbar">
         <div>
          <div className='edutrack-head'>
+         <ion-icon className="menu" name="menu-outline" onClick={()=>{
+          setNavbar(!navbar)
+         }}></ion-icon>
          <div className='edutrack-icon'>
             <img src={logo} alt="" />
           </div>
@@ -38,7 +42,12 @@ function App() {
         </div>
         
         <div className="app-nav-buttons">
-          <button 
+          {window.innerWidth<678?<ion-icon name="person-outline"
+          onClick={() => {
+            setActiveExamId(null);
+            setUser((prev) => ({ ...prev, role: 'student' }));
+          }}
+          ></ion-icon>:<button 
             onClick={() => {
               setActiveExamId(null);
               setUser((prev) => ({ ...prev, role: 'student' }));
@@ -46,10 +55,16 @@ function App() {
             className={`btn-nav ${user.role === 'student' && !activeExamId ? 'btn-nav-active' : ''}`}
           >
             Student Dashboard
-          </button>
+          </button>}
 
           
           {isAdminUser && (
+            window.innerWidth<678?<img src={user_sheild} alt='' width="25"
+            onClick={() => {
+              setActiveExamId(null);
+              setUser((prev) => ({ ...prev, role: 'admin' }));
+            }}
+            />:
             <button 
               onClick={() => {
                 setActiveExamId(null);
@@ -61,7 +76,12 @@ function App() {
             </button>
           )}
 
-          <button 
+          {window.innerWidth<678?<ion-icon name="log-out-outline"
+          onClick={() => {
+            setActiveExamId(null);
+            setUser(null); 
+          }}
+          ></ion-icon>:<button 
             onClick={() => {
               setActiveExamId(null);
               setUser(null); 
@@ -69,7 +89,7 @@ function App() {
             className="btn-nav btn-logout"
           >
             Logout
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -88,6 +108,7 @@ function App() {
             isAdminUser ? () => setUser((prev) => ({ ...prev, role: 'admin' })) : null
           }
           onLogout={() => setUser(null)}
+          navbar={navbar}
         />
       )}
 

@@ -10,7 +10,7 @@
 
 .dashboard-left{
   width: 20%;
-  height: 100vh;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -19,6 +19,7 @@
   padding: 10px;
   position: fixed;
   border: 1px solid rgba(49, 41, 41, 0.315);
+  scroll-behavior: unset;
   
 }
 .dashboard-item{
@@ -442,6 +443,38 @@ p,h1,h2,h3,h4,h5,h6{
   }
 }
 @media (max-width: 600px) {
+  
+  .dashboard-left{
+    left: -300px;
+    transition: left 0.3s ease-in-out;
+    position: fixed;
+    overflow-y: hidden;
+    height: 88vh;
+    z-index: 10000;
+  }
+  .dashboard-left.navbar{
+    left: 0px;
+    z-index: 1;
+    width: 200px;
+    position: fixed;
+  }
+  .dashboard-user-profile{
+    padding: 5px;
+    position: absolute;
+    width: 100%;
+    margin-top: 0px;
+    display: flex;
+    flex-direction: row;
+  }
+  .dashboard-user-profile h4{
+    font-size: 13px;
+  }
+  .dashboard-user-profile p{
+    font-size: 10px;
+  }
+  .dashboard-user-profile ion-icon{
+    font-size: 30px;
+  }
   .user-details-card {
     padding: 20px;
   }
@@ -450,5 +483,31 @@ p,h1,h2,h3,h4,h5,h6{
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+  }
+  .exams-section{
+    width: 100%;
+  }
+  .student-progress-box{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 10px;
+  }
+  .student-progress-box div{
+    width: 140px;
+  }
+  .submitted-exam-items{
+    display: grid;
+    grid-template-columns: repeat(1,1fr);
+  }
+  .progress-boxes{
+    padding: 5px;
+  }
+  .progress-box-img{
+    max-width: 35px;
+    height: 35px;
+    padding: 5px;
+  }
+  .dashboard-banner{
+    display: none;
   }
 }

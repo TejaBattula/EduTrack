@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminDashboard.css';
-import SecurityCheck from './SecurityCheck';
 
 const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
   const [title, setTitle] = useState('');
@@ -187,7 +186,7 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
               onClick={onSwitchToStudent}
               className="btn-admin-nav"
             >
-              🎓 View in Student Dashboard
+               View in Student Dashboard
             </button>
           )}
           <button
