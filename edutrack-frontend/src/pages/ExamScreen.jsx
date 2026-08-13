@@ -56,9 +56,9 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         // Fetch Exam metadata and questions first so we have questions array for review
         let examRes;
         try {
-          examRes = await axios.get(`http://localhost:3000/api/exams/${examId}`);
+          examRes = await axios.get(`https://edutrack-cgpn.onrender.com/api/exams/${examId}`);
         } catch (e) {
-          const allRes = await axios.get('http://localhost:3000/api/exams/all');
+          const allRes = await axios.get('https://edutrack-cgpn.onrender.com/api/exams/all');
           const found = allRes.data.find((exam) => String(exam.id) === String(examId));
           examRes = { data: found };
         }
@@ -77,7 +77,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         if (user?._id) {
           try {
             const checkRes = await axios.get(
-              `http://localhost:3000/api/exams/result/${examId}/${user._id}`
+              `https://edutrack-cgpn.onrender.com/api/exams/result/${examId}/${user._id}`
             );
         
         
@@ -144,7 +144,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
   
   
       const response = await fetch(
-        "http://localhost:3000/submitexam",
+        "https://edutrack-cgpn.onrender.com/submitexam",
         {
           method: "POST",
           headers: {

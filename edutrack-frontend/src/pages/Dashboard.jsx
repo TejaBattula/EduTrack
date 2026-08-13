@@ -39,7 +39,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
   const fetchExams = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:3000/api/exams/all');
+      const res = await axios.get('https://edutrack-cgpn.onrender.com/api/exams/all');
       
       let examList = [];
       
@@ -57,7 +57,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
         const resultsMap = {};
         for (let exam of examList) {
           try {
-            const checkRes = await axios.get(`http://localhost:3000/api/exams/result/${exam.id}/${user._id}`);
+            const checkRes = await axios.get(`https://edutrack-cgpn.onrender.com/api/exams/result/${exam.id}/${user._id}`);
             if (checkRes.data.attempted) {
               resultsMap[exam.id] = checkRes.data.result;
               

@@ -53,13 +53,13 @@ const Login = ({ setUser }) => {
     }
 
     const endpoint = isRegister 
-      ? 'https://edutrack-backend-rtoh.onrender.com/api/auth/register' 
-      : 'https://edutrack-backend-rtoh.onrender.com/api/auth/login';
+      ? 'https://edutrack-cgpn.onrender.com/api/auth/register' 
+      : 'https://edutrack-cgpn.onrender.com/api/auth/login';
 
     try {
       // const res = await axios.post(endpoint, { ...formData, role });
       console.log("formdata login",formData);
-      const response = await fetch(isRegister?"http://localhost:3000/signup":"http://localhost:3000/login",{
+      const response = await fetch(isRegister?"https://edutrack-cgpn.onrender.com/signup":"https://edutrack-cgpn.onrender.com/login",{
         method : "POST",
         headers : {"Content-Type":"application/json"},
         body : JSON.stringify(formData)

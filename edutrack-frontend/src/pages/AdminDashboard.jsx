@@ -25,7 +25,7 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
   // Fetch Existing Assignments on Load
   const fetchExams = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/exams/all');
+      const res = await axios.get('https://edutrack-cgpn.onrender.com/api/exams/all');
       setExistingExams(res.data);
     } catch (err) {
       console.error('Error fetching exams:', err);
@@ -40,7 +40,7 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
   const handleDeleteExam = async (id) => {
     if (window.confirm('Are you sure you want to delete this assignment?')) {
       try {
-        await axios.delete(`http://localhost:3000/api/exams/delete/${id}`);
+        await axios.delete(`https://edutrack-cgpn.onrender.com/api/exams/delete/${id}`);
         alert('Assignment deleted successfully!');
         fetchExams(); // List Refresh
       } catch (err) {
@@ -132,7 +132,7 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
     console.log("=====",payload);
     
     try {
-      await axios.post('http://localhost:3000/api/exams/create', payload);
+      await axios.post('https://edutrack-cgpn.onrender.com/api/exams/create', payload);
       setSuccess('Assignment published successfully!');
       
       // Reset Form
