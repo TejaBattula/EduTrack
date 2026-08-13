@@ -8,7 +8,7 @@ import user_sheild from "./assets/shield-user.svg"
 import logo from "./assets/logo.jpeg";
 const ADMIN_EMAILS = [
   "s221204@rguktsklm.ac.in",
-  "s221149@rguktsklm.ac.in",
+  "s221147@rguktsklm.ac.in",
   "coordinator_hc@rguktsklm.ac.in",
   "s220261@rguktsklm.ac.in"
 ].map(email => email.toLowerCase());

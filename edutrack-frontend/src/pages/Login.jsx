@@ -9,7 +9,7 @@ import logo from "../assets/logo.jpeg"
 import AdminDashboard from './AdminDashboard';
 const ALLOWED_ADMIN_EMAILS = [
   
-  "s221204@rguktsklm.ac.in","s221149@rguktsklm.ac.in","coordinator_hc@rguktsklm.ac.in","s220261@rguktsklm.ac.in"
+  "s221204@rguktsklm.ac.in","s221147@rguktsklm.ac.in","coordinator_hc@rguktsklm.ac.in","s220261@rguktsklm.ac.in"
 ];
 
 const ALLOWED_DOMAIN = 'rguktsklm.ac.in';
