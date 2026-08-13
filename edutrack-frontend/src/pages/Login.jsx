@@ -5,7 +5,7 @@ import { jwtDecode } from 'jwt-decode';
 import './Login.css';
 import edutrack_icon from "../assets/graduation-cap.svg"
 import adminSheild from "../assets/user-shield.svg"
-import logo from "/home/user/Desktop/Edutrack/edutrack-frontend/src/assets/logo.jpeg"
+import logo from "../assets/logo.jpeg"
 import AdminDashboard from './AdminDashboard';
 // 👑 Specific Allowed Admin Mails
 const ALLOWED_ADMIN_EMAILS = [
