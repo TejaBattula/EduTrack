@@ -173,7 +173,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
             </div>
             <div className='progress-box-info'>
             <p>Productivity</p>
-            <p>{((correctans || 0 /totalque || 0)*100).toFixed(2)   || 0 }%</p>
+            <p>{((correctans/totalque)*100).toFixed(2)   || 0 }%</p>
 
             </div>
           </div>
@@ -193,12 +193,7 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
               
             </div>
             <button 
-              onClick={()=>{fetchExams
-                // window.scrollTo({
-                //   top: 0,
-                //   behavior: "smooth"
-                // });
-              }}
+              onClick={fetchExams}
               className="btn-refresh"
             >
               <img src={refresh} alt="" />
