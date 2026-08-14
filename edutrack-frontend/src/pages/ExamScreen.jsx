@@ -275,7 +275,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
   }
 
   // 📊 Statistics Display & Answer Review Screen
-  console.log("Statistics Display & Answer Review Screen",isSubmitted&&stats);
   
   if (isSubmitted && stats) {
     const wrongAnswers = Number(stats.totalQuestions) - Number(stats.score);
