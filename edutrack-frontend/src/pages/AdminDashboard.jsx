@@ -129,7 +129,6 @@ const AdminDashboard = ({ user, onSwitchToStudent, onLogout }) => {
       questions: questions,
       securityCode : newcode
     };
-    console.log("=====",payload);
     
     try {
       await axios.post('https://edutrack-cgpn.onrender.com/api/exams/create', payload);
