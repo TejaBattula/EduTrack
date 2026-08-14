@@ -193,7 +193,12 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
               
             </div>
             <button 
-              onClick={fetchExams}
+              onClick={()=>{fetchExams
+                // window.scrollTo({
+                //   top: 0,
+                //   behavior: "smooth"
+                // });
+              }}
               className="btn-refresh"
             >
               <img src={refresh} alt="" />
