@@ -11,7 +11,6 @@ import productper from "../assets/square-dashed-kanban.svg"
 import CircularProgress from '../components/chart/circleChart';
 import logo from "../assets/logo.jpeg"
 const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
-  console.log("dashboard",user);
   
   const [exams, setExams] = useState([]);
   const [userResults, setUserResults] = useState({});

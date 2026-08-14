@@ -26,8 +26,8 @@ const Login = ({ setUser }) => {
   const [error, setError] = useState('');
   const [showAdmin, setShowAdmin] = useState(false);
   const [loading,setloading]=useState(false)
-  // const navigate = useNavigate()
-  // Domain & Role Validation Helper
+  const [registerationLoading,setRegistrationLoading]=useState(false)
+  const [loginError,setloginerror]=useState('')
   const validateAndGetRole = (email) => {
     if (!email || !email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`)) {
       return null; // Invalid Domain
@@ -54,8 +54,8 @@ const Login = ({ setUser }) => {
       : 'https://edutrack-cgpn.onrender.com/api/auth/login';
 
     try {
-      // const res = await axios.post(endpoint, { ...formData, role });
-      console.log("formdata login",formData);
+        
+      isRegister?setRegistrationLoading(true):setRegistrationLoading(false)
       const response = await fetch(isRegister?"https://edutrack-cgpn.onrender.com/signup":"https://edutrack-cgpn.onrender.com/login",{
         method : "POST",
         headers : {"Content-Type":"application/json"},
@@ -66,6 +66,7 @@ const Login = ({ setUser }) => {
       if (!isRegister) {
        
         setUser(data.data);
+        setloginerror(data.message)
 
       } else {
         alert('Registration Successful! Please login.');
@@ -77,33 +78,10 @@ const Login = ({ setUser }) => {
       setError(err.response?.data?.message || 'Something went wrong');
     }
     setloading(false)
+    setRegistrationLoading(false)
   };
 
-  const handleGoogleSuccess = (credentialResponse) => {
-    try {
-      const decodedUser = jwtDecode(credentialResponse.credential);
-      const userEmail = decodedUser.email;
-
-      const role = validateAndGetRole(userEmail);
-      if (!role) {
-        setError(`Access Denied! Only @${ALLOWED_DOMAIN} Google accounts are allowed.`);
-        return;
-      }
-
-      const realGoogleUser = {
-        id: decodedUser.sub,
-        name: decodedUser.name,
-        email: userEmail,
-        picture: decodedUser.picture,
-        role: role 
-      };
-
-      localStorage.setItem('user', JSON.stringify(realGoogleUser));
-      setUser(realGoogleUser);
-    } catch (err) {
-      setError('Failed to parse Google Login details.');
-    }
-  };
+  
 
   return (
     <div className="login-container">
@@ -131,7 +109,7 @@ const Login = ({ setUser }) => {
         </div>
 
         {error && <p className="login-error">{error}</p>}
-        
+        {loginError!=''?<p className='login-error'>{loginError}</p>:""}
         <form onSubmit={handleSubmit}>
           {isRegister && (
             
@@ -209,19 +187,13 @@ const Login = ({ setUser }) => {
          </>:""
          }
           <button type="submit" className="login-submit-btn">
-            {isRegister ? 'Register' : loading===true?"Authenticating please wait...":"Login"}
+            {isRegister ? registerationLoading===true?<p><span className='spinner'></span>Please wait</p>:'Register' : loading===true?"Authenticating please wait...":"Login"}
           </button>
         </form>
 
-        <div className="login-divider">OR</div>
 
         {/* Real Official Google OAuth Button */}
-        <div className="google-btn-wrapper">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setError('Google Sign-In Failed')}
-          />
-        </div>
+        
        
         <p className="login-toggle-link" onClick={() => { setError(''); setIsRegister(!isRegister); }}>
           {isRegister ? <span>Already have an account? <span>Login</span></span> : <span>Don't have an account? <span>Register</span></span>}

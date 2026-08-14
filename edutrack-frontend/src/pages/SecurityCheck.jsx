@@ -5,12 +5,10 @@ const SecurityCheck = ({ secCode, onStartExam, examid ,securityCode,setSelectedE
     const [loading,setloading]=useState(false)
     const [error,seterror]=useState(false)
     const handleStart = () => {
-        console.log(securityCode);
         setloading(true)
        if(securityCode===security){
         onStartExam(examid);
        }else{
-        console.log("not matched...");
         setloading(false)
         seterror(true)
        }

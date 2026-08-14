@@ -202,7 +202,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     }
   };
 
-  // 3. ⏱️ Countdown Timer Logic
   useEffect(() => {
     if (loading || isSubmitted || !exam) return;
 
@@ -220,7 +219,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     return () => clearInterval(timerInterval);
   }, [loading, isSubmitted, exam]);
 
-  // 4. 🚨 Anti-Cheating Tab Switch Detection
   useEffect(() => {
     if (loading || isSubmitted || !exam) return;
 
