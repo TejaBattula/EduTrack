@@ -30,7 +30,8 @@ function App() {
 
 
   return (
-    <div className="app-container">
+          
+          <div className="app-container" onClick={()=>{if(navbar===true){setNavbar(!navbar)}}}>
       
       <div className="app-navbar">
         <div>
