@@ -271,10 +271,10 @@ app.post("/submitexam", async (req, res) => {
     console.log("Score:", score, "/ Total:", totalQuestions, "/ Percentage:", percentage);
 
     const submission = new ExamSubmission({
-      name : String(name),
-      userEmail : String(userEmail),
-      department : String(department),
-      examName : String(examName),
+      name : name,
+      userEmail : userEmail,
+      department : department,
+      examName : examName,
       userId: String(userId),
       examId: String(examId),
       userAnswers,
