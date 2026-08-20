@@ -130,7 +130,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         name : user.name,
         userEmail : user.email,
         department : user.department,
-        examName : "ssc",
+        examName : exam?.title,
         userId: user?._id || user?.id,
         examId: examId,
         userAnswers: answersToSubmit,
