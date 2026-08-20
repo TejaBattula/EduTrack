@@ -30,7 +30,7 @@ const addToGoogleSheet = async (submission) => {
   try {
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID,
-      range: "Sheet1!A:G",
+      range: "EduTrack Exam Submissions!A:G",
       valueInputOption: "USER_ENTERED",
       resource: {
         values: [[
