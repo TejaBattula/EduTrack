@@ -3,12 +3,53 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
-
+const { google } = require("googleapis");
 app.use(express.json());
 app.use(cors());
 
 const PORT = 3000;
+// ======================================================
+// GOOGLE SHEETS
+// ======================================================
 
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    project_id: process.env.GOOGLE_PROJECT_ID,
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  },
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+});
+
+const sheets = google.sheets({
+  version: "v4",
+  auth,
+});
+
+const addToGoogleSheet = async (submission) => {
+  try {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SPREADSHEET_ID,
+      range: "Sheet1!A:G",
+      valueInputOption: "USER_ENTERED",
+      resource: {
+        values: [[
+          submission.name,
+          submission.userEmail,
+          submission.department,
+          submission.examName,
+          submission.totalQuestions,
+          submission.score,
+          submission.createdAt
+        ]]
+      }
+    });
+
+    console.log("✅ Submission added to Google Sheet");
+  } catch (error) {
+    console.error("❌ Google Sheets error:", error.message);
+  }
+};
 // ======================================================
 // SCHEMAS & MODELS
 // ======================================================
@@ -286,6 +327,8 @@ app.post("/submitexam", async (req, res) => {
     const savedSubmission = await submission.save();
     console.log("Submission saved:", savedSubmission._id);
 
+    // Add submission to Google Sheets
+    await addToGoogleSheet(savedSubmission);
     return res.status(201).json({
       success: true,
       message: "Exam submitted successfully",
