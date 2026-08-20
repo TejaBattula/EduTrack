@@ -42,9 +42,14 @@ examSchema.set("toObject", { virtuals: true });
 // --- Exam Submission Schema ---
 const examSubmissionSchema = new mongoose.Schema(
   {
+    name : {type: String, required: true },
+
     userEmail: { type: String, required: true },
+    department : {type: String, required: true },
+    examName : {type: String, required: true },
     userId: { type: String, required: true },
     examId: { type: String, required: true },
+
     userAnswers: { type: mongoose.Schema.Types.Mixed, required: true },
     score: { type: Number, default: 0 },
     totalQuestions: { type: Number, default: 0 },
@@ -212,13 +217,10 @@ app.get("/api/exams/:id", async (req, res) => {
 // POST /submitexam
 app.post("/submitexam", async (req, res) => {
   try {
-    const {userEmail, userId, examId, userAnswers, questions } = req.body;
+    const {name,userEmail,department,examName, userId, examId, userAnswers, questions } = req.body;
 
-    console.log("=================================");
-    console.log("EXAM SUBMISSION");
-    console.log("User ID:", userId);
-    console.log("Exam ID:", examId);
-    console.log("=================================");
+    console.log("=====================examDetails",name,userEmail,department,examName, userId, examId, userAnswers, questions);
+   
 
     if (!userId) return res.status(400).json({ success: false, message: "userId is required" });
     if (!examId) return res.status(400).json({ success: false, message: "examId is required" });
@@ -269,7 +271,10 @@ app.post("/submitexam", async (req, res) => {
     console.log("Score:", score, "/ Total:", totalQuestions, "/ Percentage:", percentage);
 
     const submission = new ExamSubmission({
+      name : String(name),
       userEmail : String(userEmail),
+      department : String(department),
+      examName : String(examName),
       userId: String(userId),
       examId: String(examId),
       userAnswers,

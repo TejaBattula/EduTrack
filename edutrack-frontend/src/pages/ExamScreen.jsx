@@ -127,14 +127,18 @@ const ExamScreen = ({ user, examId, setExamId }) => {
   
     try {
       const payload = {
+        name : user.name,
         userEmail : user.email,
+        department : user.department,
+        examName : "ssc",
         userId: user?._id || user?.id,
         examId: examId,
         userAnswers: answersToSubmit,
         questions: currentQuestions
       };
   
-  
+      console.log(payload);
+      
       const response = await fetch(
         "https://edutrack-cgpn.onrender.com/submitexam",
         {
@@ -274,7 +278,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
     );
   }
 
-  // 📊 Statistics Display & Answer Review Screen
   
   if (isSubmitted && stats) {
     const wrongAnswers = Number(stats.totalQuestions) - Number(stats.score);
@@ -311,7 +314,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
           </div>
         </div>
 
-        {/* Detailed Question Review Section */}
         <div className="review-section" style={{ marginTop: '30px', textAlign: 'left' }}>
           <h3 style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '10px', marginBottom: '20px' }}>
             📝 Question Breakdown & Answers

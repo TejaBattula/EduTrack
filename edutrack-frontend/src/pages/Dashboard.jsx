@@ -34,7 +34,6 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
     ? (correctans / totalque) * 100
     : 0;
   
-  // Fetch Exams and User Attempt Results from Backend
   const fetchExams = async () => {
     try {
       setLoading(true);
