@@ -1,13 +1,24 @@
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 require("dotenv").config();
+
 const express = require("express");
 const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { google } = require("googleapis");
+const multer = require("multer");
+const XLSX = require("xlsx");
+
 app.use(express.json());
 app.use(cors());
 
-const PORT = 3000;
+// Configure Multer for File Uploads in Memory
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+const PORT = process.env.PORT || 3000;
+
 // ======================================================
 // GOOGLE SHEETS
 // ======================================================
@@ -16,7 +27,7 @@ const auth = new google.auth.GoogleAuth({
   credentials: {
     project_id: process.env.GOOGLE_PROJECT_ID,
     client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
   },
   scopes: ["https://www.googleapis.com/auth/spreadsheets"],
 });
@@ -50,6 +61,7 @@ const addToGoogleSheet = async (submission) => {
     console.error("❌ Google Sheets error:", error.message);
   }
 };
+
 // ======================================================
 // SCHEMAS & MODELS
 // ======================================================
@@ -72,22 +84,21 @@ const examSchema = new mongoose.Schema(
     title: { type: String, required: true, trim: true },
     duration_minutes: { type: Number, default: 60 },
     questions: { type: mongoose.Schema.Types.Mixed, required: true },
-    securityCode : {type : String,required :true}
+    securityCode: { type: String, required: true }
   },
   { timestamps: true }
 );
-// Expose _id as 'id' in JSON so frontend can use exam.id
+
 examSchema.set("toJSON", { virtuals: true });
 examSchema.set("toObject", { virtuals: true });
 
 // --- Exam Submission Schema ---
 const examSubmissionSchema = new mongoose.Schema(
   {
-    name : {type: String, required: true },
-
+    name: { type: String, required: true },
     userEmail: { type: String, required: true },
-    department : {type: String, required: true },
-    examName : {type: String, required: true },
+    department: { type: String, required: true },
+    examName: { type: String, required: true },
     userId: { type: String, required: true },
     examId: { type: String, required: true },
 
@@ -97,11 +108,22 @@ const examSubmissionSchema = new mongoose.Schema(
     percentage: { type: Number, default: 0 }
   },
   { timestamps: true }
-)
+);
+
+// --- Published Result Schema ---
+const publishedResultSchema = new mongoose.Schema(
+  {
+    testName: { type: String, required: true, trim: true },
+    results: { type: mongoose.Schema.Types.Mixed, required: true },
+    fileName: { type: String, default: "" }
+  },
+  { timestamps: true }
+);
 
 const User = mongoose.model("Users", contactSchema);
 const Exam = mongoose.model("Exam", examSchema);
 const ExamSubmission = mongoose.model("ExamSubmission", examSubmissionSchema);
+const PublishedResult = mongoose.model("PublishedResult", publishedResultSchema);
 
 // ======================================================
 // AUTH ROUTES
@@ -111,7 +133,6 @@ app.get("/", (req, res) => {
   res.send("EduTrack Backend - Connected to route /");
 });
 
-// POST /signup
 app.post("/signup", async (req, res) => {
   const usersignup = req.body;
   try {
@@ -129,10 +150,8 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// POST /login
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  console.log("Login route - email:", email);
   try {
     const foundUser = await User.findOne({ email, password });
     if (!foundUser) {
@@ -146,10 +165,9 @@ app.post("/login", async (req, res) => {
 });
 
 // ======================================================
-// EXAM ROUTES  (/api/exams/*)
+// EXAM ROUTES (/api/exams/*)
 // ======================================================
 
-// GET /api/exams/all  - Fetch all exams
 app.get("/api/exams/all", async (req, res) => {
   try {
     const exams = await Exam.find().sort({ createdAt: -1 });
@@ -160,31 +178,29 @@ app.get("/api/exams/all", async (req, res) => {
   }
 });
 
-// POST /api/exams/create  - Create / publish a new exam
 app.post("/api/exams/create", async (req, res) => {
-  console.log(req.body);
-  
   try {
-    const { title, duration_minutes, questions,securityCode } = req.body;
+    const { title, duration_minutes, questions, securityCode } = req.body;
     if (!title || !title.trim()) {
       return res.status(400).json({ success: false, message: "Title is required" });
     }
     if (!questions || !Array.isArray(questions) || questions.length === 0) {
       return res.status(400).json({ success: false, message: "At least one question is required" });
     }
-    const exam = new Exam({ title: title.trim(), duration_minutes: parseInt(duration_minutes) || 60, questions,securityCode:securityCode });
+    const exam = new Exam({
+      title: title.trim(),
+      duration_minutes: parseInt(duration_minutes) || 60,
+      questions,
+      securityCode
+    });
     const saved = await exam.save();
-    console.log("=======",saved);
-    
-    console.log("Exam created:", saved.title);
     return res.status(201).json({ success: true, message: "Exam published successfully!", data: saved });
   } catch (error) {
     console.error("Create exam error:", error);
-    return res.status(500).json({ success: false, message: "Failed to create exam", error: error.message, details: error.message });
+    return res.status(500).json({ success: false, message: "Failed to create exam", error: error.message });
   }
 });
 
-// DELETE /api/exams/delete/:id  - Delete an exam
 app.delete("/api/exams/delete/:id", async (req, res) => {
   try {
     const deleted = await Exam.findByIdAndDelete(req.params.id);
@@ -198,11 +214,8 @@ app.delete("/api/exams/delete/:id", async (req, res) => {
   }
 });
 
-// GET /api/exams/result/:examId/:userId  - Check if user attempted an exam
 app.get("/api/exams/result/:examId/:userId", async (req, res) => {
-   const { examId, userId } = req.params;
-  console.log(examId,userId);
-  
+  const { examId, userId } = req.params;
   try {
     const submission = await ExamSubmission.findOne({
       examId: String(examId),
@@ -212,8 +225,7 @@ app.get("/api/exams/result/:examId/:userId", async (req, res) => {
     if (!submission) {
       return res.status(200).json({ success: true, attempted: false, message: "Exam not attempted" });
     }
-    
-    
+
     return res.status(200).json({
       success: true,
       attempted: true,
@@ -222,10 +234,8 @@ app.get("/api/exams/result/:examId/:userId", async (req, res) => {
         userId: submission.userId,
         examId: submission.examId,
         userAnswers: submission.userAnswers,
-        user_answers: submission.userAnswers,
         score: submission.score,
         totalQuestions: submission.totalQuestions,
-        total_questions: submission.totalQuestions,
         percentage: submission.percentage,
         createdAt: submission.createdAt,
         updatedAt: submission.updatedAt
@@ -237,7 +247,6 @@ app.get("/api/exams/result/:examId/:userId", async (req, res) => {
   }
 });
 
-// GET /api/exams/:id  - Get single exam by id
 app.get("/api/exams/:id", async (req, res) => {
   try {
     const exam = await Exam.findById(req.params.id);
@@ -252,22 +261,97 @@ app.get("/api/exams/:id", async (req, res) => {
 });
 
 // ======================================================
+// PUBLISHED RESULTS ROUTES (/api/results/*)
+// ======================================================
+
+// POST /api/results/publish - Upload Excel & save results
+app.post("/api/results/publish", upload.single("file"), async (req, res) => {
+  try {
+    const { testName } = req.body;
+
+    if (!testName || !testName.trim()) {
+      return res.status(400).json({ success: false, message: "Test Name is required" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Excel file is required" });
+    }
+
+    const fileName = req.file.originalname.toLowerCase();
+    if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
+      return res.status(400).json({ success: false, message: "Only Excel files (.xlsx or .xls) are allowed" });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+
+    if (!sheetName) {
+      return res.status(400).json({ success: false, message: "Excel file does not contain any sheet" });
+    }
+
+    const worksheet = workbook.Sheets[sheetName];
+    const results = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+    if (!results.length) {
+      return res.status(400).json({ success: false, message: "Excel file is empty" });
+    }
+
+    const publishedResult = new PublishedResult({
+      testName: testName.trim(),
+      results: results,
+      fileName: req.file.originalname
+    });
+
+    const savedResult = await publishedResult.save();
+    console.log("✅ Result published:", savedResult.testName);
+
+    return res.status(201).json({
+      success: true,
+      message: "Result published successfully!",
+      data: savedResult
+    });
+
+  } catch (error) {
+    console.error("❌ Publish result error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to publish result",
+      error: error.message
+    });
+  }
+});
+
+// GET /api/results - Get all published results
+app.get("/api/results", async (req, res) => {
+  try {
+    const results = await PublishedResult.find().sort({ createdAt: -1 });
+    return res.status(200).json({
+      success: true,
+      count: results.length,
+      data: results
+    });
+  } catch (error) {
+    console.error("Get published results error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch published results",
+      error: error.message
+    });
+  }
+});
+
+// ======================================================
 // SUBMISSION ROUTES
 // ======================================================
 
-// POST /submitexam
 app.post("/submitexam", async (req, res) => {
   try {
-    const {name,userEmail,department,examName, userId, examId, userAnswers, questions } = req.body;
-
-    console.log("=====================examDetails",name,userEmail,department,examName, userId, examId, userAnswers, questions);
-   
+    const { name, userEmail, department, examName, userId, examId, userAnswers, questions } = req.body;
 
     if (!userId) return res.status(400).json({ success: false, message: "userId is required" });
     if (!examId) return res.status(400).json({ success: false, message: "examId is required" });
     if (!userAnswers) return res.status(400).json({ success: false, message: "userAnswers are required" });
 
-    // Prevent duplicate submission
     const previousSubmission = await ExamSubmission.findOne({
       userId: String(userId),
       examId: String(examId)
@@ -277,18 +361,10 @@ app.post("/submitexam", async (req, res) => {
       return res.status(409).json({
         success: false,
         message: "You have already submitted this exam.",
-        data: {
-          submission: previousSubmission,
-          stats: {
-            score: previousSubmission.score,
-            totalQuestions: previousSubmission.totalQuestions,
-            percentage: previousSubmission.percentage
-          }
-        }
+        data: { submission: previousSubmission }
       });
     }
 
-    // Score Calculation
     let score = 0;
     let totalQuestions = 0;
 
@@ -309,13 +385,11 @@ app.post("/submitexam", async (req, res) => {
 
     const percentage = totalQuestions > 0 ? Number(((score / totalQuestions) * 100).toFixed(2)) : 0;
 
-    console.log("Score:", score, "/ Total:", totalQuestions, "/ Percentage:", percentage);
-
     const submission = new ExamSubmission({
-      name : name,
-      userEmail : userEmail,
-      department : department,
-      examName : examName,
+      name,
+      userEmail,
+      department,
+      examName,
       userId: String(userId),
       examId: String(examId),
       userAnswers,
@@ -325,10 +399,8 @@ app.post("/submitexam", async (req, res) => {
     });
 
     const savedSubmission = await submission.save();
-    console.log("Submission saved:", savedSubmission._id);
-
-    // Add submission to Google Sheets
     await addToGoogleSheet(savedSubmission);
+
     return res.status(201).json({
       success: true,
       message: "Exam submitted successfully",
@@ -341,52 +413,6 @@ app.post("/submitexam", async (req, res) => {
   }
 });
 
-// GET /result/:examId/:userId  (legacy route kept for backward compat)
-app.get("/result/:examId/:userId", async (req, res) => {
-  try {
-    const { examId, userId } = req.params;
-    const submission = await ExamSubmission.findOne({ examId: String(examId), userId: String(userId) });
-
-    if (!submission) {
-      return res.status(200).json({ success: true, attempted: false, message: "Exam not attempted" });
-    }
-
-    return res.status(200).json({
-      success: true,
-      attempted: true,
-      result: {
-        id: submission._id,
-        userId: submission.userId,
-        examId: submission.examId,
-        userAnswers: submission.userAnswers,
-        user_answers: submission.userAnswers,
-        score: submission.score,
-        totalQuestions: submission.totalQuestions,
-        total_questions: submission.totalQuestions,
-        percentage: submission.percentage,
-        createdAt: submission.createdAt,
-        updatedAt: submission.updatedAt
-      }
-    });
-  } catch (error) {
-    console.error("Get result error:", error);
-    return res.status(500).json({ success: false, message: "Failed to retrieve exam result", error: error.message });
-  }
-});
-
-// GET /submissions/user/:userId
-app.get("/submissions/user/:userId", async (req, res) => {
-  try {
-    const { userId } = req.params;
-    const submissions = await ExamSubmission.find({ userId: String(userId) }).sort({ createdAt: -1 });
-    return res.status(200).json({ success: true, count: submissions.length, data: submissions });
-  } catch (error) {
-    console.error("Get user submissions error:", error);
-    return res.status(500).json({ success: false, message: "Failed to retrieve submissions", error: error.message });
-  }
-});
-
-// GET /submissions
 app.get("/submissions", async (req, res) => {
   try {
     const submissions = await ExamSubmission.find().sort({ createdAt: -1 });

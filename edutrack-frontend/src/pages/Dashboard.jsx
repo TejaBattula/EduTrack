@@ -21,6 +21,11 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
   const [securitycode,setSecurityCode]=useState('')
   const [dashboardView,setdashboardView]=useState('dashboard')
   const [noattemptedexams,setnoattemptedexams]=useState(0)
+  const [publishedResults, setPublishedResults] = useState([]);
+  const [selectedResult, setSelectedResult] = useState(null);
+  const [resultSearch, setResultSearch] = useState("");
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsError, setResultsError] = useState("");
   const correctans = Object.values(userResults).reduce(
     (total, result) => total + result.score,
     0
@@ -92,6 +97,34 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
       
     
   }
+  const fetchPublishedResults = async () => {
+  try {
+    setResultsLoading(true);
+    setResultsError("");
+
+    const response = await axios.get(
+      "https://edutrack-cgpn.onrender.com/api/results"
+    );
+
+    if (response.data.success) {
+      setPublishedResults(response.data.data || []);
+    } else {
+      setPublishedResults([]);
+    }
+
+  } catch (error) {
+    console.error(
+      "Error fetching published results:",
+      error
+    );
+
+    setResultsError(
+      "Failed to load published results."
+    );
+  } finally {
+    setResultsLoading(false);
+  }
+};
   
   return (
     <div className="dashboard-container">
@@ -110,6 +143,9 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
       <div className={dashboardView==="submitted"?'dashboard-item active':'dashboard-item'} onClick={()=>{setdashboardView("submitted")}}>
         <h4>Submitted</h4>
         <ion-icon name="paper-plane-outline"></ion-icon>
+      </div>
+      <div className={dashboardView === "results"? "dashboard-item active": "dashboard-item"}onClick={() => {setdashboardView("results");setSelectedResult(null);setResultSearch("");fetchPublishedResults();}}>
+          <h4>Results</h4>
       </div>
       
       <div className={dashboardView==="myprofile"?'dashboard-item active':'dashboard-item'} onClick={()=>{setdashboardView("myprofile")}}>
@@ -354,6 +390,218 @@ const Dashboard = ({ user, onStartExam, onSwitchToAdmin, onLogout ,navbar}) => {
             })}
             </div>
           </div>:""
+        }
+        {
+          dashboardView === "results" && (
+            <div className="student-results-section">
+
+              <h3 className="section-title">
+                Published Results
+              </h3>
+
+              {resultsLoading && (
+                <div className="loading-animation">
+                  <div className="loading-content">
+                    Loading results...
+                  </div>
+                </div>
+              )}
+
+              {resultsError && (
+                <p className="status-error">
+                  {resultsError}
+                </p>
+              )}
+
+              {!resultsLoading &&
+                !resultsError &&
+                !selectedResult && (
+                  <div>
+
+                    {publishedResults.length === 0 ? (
+
+                      <div className="status-empty">
+                        No results published yet.
+                      </div>
+
+                    ) : (
+
+                      <div className="published-results-list">
+
+                        {publishedResults.map((result) => (
+
+                          <div
+                            className="published-result-card"
+                            key={result.testName}
+                          >
+
+                            <div>
+                              <h3>
+                                {result.testName}
+                              </h3>
+
+                              <p>
+                                Results published
+                              </p>
+                            </div>
+
+                            <button
+                              className="btn-exam-action btn-exam-view-stats"
+                              onClick={() =>
+                                setSelectedResult(result)
+                              }
+                            >
+                              View Results
+                            </button>
+
+                          </div>
+
+                        ))}
+
+                      </div>
+
+                    )}
+
+                  </div>
+                )
+              }
+
+              {/* SINGLE TEST RESULT */}
+
+              {selectedResult && (
+
+                <div className="result-details-container">
+
+                  <button
+                    className="result-back-button"
+                    onClick={() => {
+                      setSelectedResult(null);
+                      setResultSearch("");
+                    }}
+                  >
+                    ← Back
+                  </button>
+
+                  <h2>
+                    {selectedResult.testName}
+                  </h2>
+
+                  <p className="result-subtitle">
+                    Results
+                  </p>
+
+
+                  {/* SEARCH */}
+
+                  <div className="result-search-container">
+
+                    <input
+                      type="text"
+                      placeholder="Search Rank, RAME, ID, Department or Marks..."
+                      value={resultSearch}
+                      onChange={(e) =>
+                        setResultSearch(e.target.value)
+                      }
+                      className="result-search-input"
+                    />
+
+                  </div>
+
+
+                  {/* TABLE */}
+
+                  <div className="results-table-wrapper">
+
+                    <table className="results-table">
+
+                      <thead>
+
+                        <tr>
+                          <th>Rank</th>
+                          <th>Name</th>
+                          <th>ID</th>
+                          <th>DEPT</th>
+                          <th>Marks</th>
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        {selectedResult.results
+                          .filter((row) => {
+
+                            const search =
+                              resultSearch
+                                .toLowerCase()
+                                .trim();
+
+                            if (!search) {
+                              return true;
+                            }
+
+                            return (
+                              String(row.rank)
+                                .toLowerCase()
+                                .includes(search) ||
+
+                              String(row.rame)
+                                .toLowerCase()
+                                .includes(search) ||
+
+                              String(row.studentId)
+                                .toLowerCase()
+                                .includes(search) ||
+
+                              String(row.dept)
+                                .toLowerCase()
+                                .includes(search) ||
+
+                              String(row.marks)
+                                .toLowerCase()
+                                .includes(search)
+                            );
+                          })
+                          .map((row) => (
+
+                            <tr key={row._id}>
+
+                              <td>
+                                {row.rank}
+                              </td>
+
+                              <td>
+                                {row.rame}
+                              </td>
+
+                              <td>
+                                {row.studentId}
+                              </td>
+
+                              <td>
+                                {row.dept}
+                              </td>
+
+                              <td>
+                                {row.marks}
+                              </td>
+
+                            </tr>
+
+                          ))}
+
+                      </tbody>
+
+                    </table>
+
+                  </div>
+
+                </div>
+
+              )}
+
+            </div>
+          )
         }
         {
           dashboardView==="myprofile"?<div className="user-details-card">
