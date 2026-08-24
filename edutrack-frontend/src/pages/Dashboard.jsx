@@ -1508,10 +1508,6 @@ const percentage =
 
                                 onClick={() => {
 
-                                  console.log(
-                                    "SELECTED RESULT:",
-                                    result
-                                  );
 
                                   setSelectedResult(result);
 
