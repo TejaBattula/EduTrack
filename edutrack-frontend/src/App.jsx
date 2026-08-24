@@ -65,7 +65,7 @@ function App() {
   
   }, []);
   if (authLoading) {
-    return <div style={{fontSize : "25px",margin:"auto"}}>Checking login...</div>;
+    return <div style={{fontSize : "25px",margin:"auto",textAlign : "center"}}>Checking login...</div>;
   }
   if (!user) {
     return <LoginScreen setUser={setUser} />;
