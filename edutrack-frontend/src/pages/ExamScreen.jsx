@@ -79,7 +79,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
             if (checkRes.data.attempted) {
                   const prev = checkRes.data.result;
 
-                  console.log("PREVIOUS RESULT:", prev);
 
                   setStats({
                     score: Number(prev.score ?? 0),
@@ -150,7 +149,6 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         questions: currentQuestions
       };
   
-      console.log(payload);
       
       const response = await fetch(
         "https://edutrack-cgpn.onrender.com/submitexam",

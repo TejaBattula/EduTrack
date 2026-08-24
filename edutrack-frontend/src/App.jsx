@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ExamScreen from './pages/ExamScreen';
@@ -15,8 +15,58 @@ const ADMIN_EMAILS = [
 
 function App() {
   const [user, setUser] = useState(null); 
+  const [authLoading, setAuthLoading] = useState(true);
   const [activeExamId, setActiveExamId] = useState(null);
   const [navbar,setNavbar]=useState(false)
+
+  useEffect(() => {
+
+    const checkAuth = async () => {
+  
+      try {
+  
+        const response = await fetch(
+          "https://edutrack-cgpn.onrender.com/auth/me",
+          {
+            credentials: "include"
+          }
+        );
+  
+        if (response.ok) {
+  
+          const data = await response.json();
+  
+          setUser(data.user);
+  
+        } else {
+  
+          setUser(null);
+  
+        }
+  
+      } catch (error) {
+  
+        console.error(
+          "Authentication check failed:",
+          error
+        );
+  
+        setUser(null);
+  
+      } finally {
+  
+        setAuthLoading(false);
+  
+      }
+  
+    };
+  
+    checkAuth();
+  
+  }, []);
+  if (authLoading) {
+    return <div>Checking login...</div>;
+  }
   if (!user) {
     return <LoginScreen setUser={setUser} />;
   }
@@ -27,7 +77,6 @@ function App() {
   };
 
   const isAdminUser = ADMIN_EMAILS.includes(user?.email?.toLowerCase());
-
 
   return (
           

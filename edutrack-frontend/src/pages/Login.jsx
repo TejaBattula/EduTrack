@@ -59,6 +59,7 @@ const Login = ({ setUser }) => {
       const response = await fetch(isRegister?"https://edutrack-cgpn.onrender.com/signup":"https://edutrack-cgpn.onrender.com/login",{
         method : "POST",
         headers : {"Content-Type":"application/json"},
+        credentials : "include",
         body : JSON.stringify(formData)
       })
       const data = await response.json()

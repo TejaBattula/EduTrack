@@ -218,10 +218,7 @@ const percentage =
         "https://edutrack-cgpn.onrender.com/api/results"
       );
 
-      console.log(
-        "PUBLISHED RESULTS API RESPONSE:",
-        response.data
-      );
+    
 
 
       if (response.data.success) {
@@ -291,7 +288,6 @@ const percentage =
     return [];
   }
 
-  console.log("RAW RESULT ROWS:", rows);
 
   const normalizedRows = rows.map((row) => {
 

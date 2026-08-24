@@ -1,46 +1,18 @@
 const dns = require("dns");
-
-// ======================================================
-// DNS
-// ======================================================
-
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
-
-
-// ======================================================
-// ENVIRONMENT
-// ======================================================
-
 require("dotenv").config();
-
-
-// ======================================================
-// IMPORTS
-// ======================================================
-
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken")
+const cookieParser = require("cookie-parser")
 const { google } = require("googleapis");
 const multer = require("multer");
 const XLSX = require("xlsx");
-
-
-// ======================================================
-// APP
-// ======================================================
-
 const app = express();
-
 const PORT = process.env.PORT || 3000;
-
-
-// ======================================================
-// MIDDLEWARE
-// ======================================================
-
 app.use(express.json());
-
+app.use(cookieParser())
 app.use(
   express.urlencoded({
     extended: true
@@ -49,16 +21,15 @@ app.use(
 
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:5173",
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
 
 
-// ======================================================
-// MULTER
-// ======================================================
+
 
 const storage = multer.memoryStorage();
 
@@ -70,9 +41,7 @@ const upload = multer({
 });
 
 
-// ======================================================
-// GOOGLE SHEETS
-// ======================================================
+
 
 const auth = new google.auth.GoogleAuth({
   credentials: {
@@ -96,9 +65,7 @@ const sheets = google.sheets({
 });
 
 
-// ======================================================
-// ADD SUBMISSION TO GOOGLE SHEET
-// ======================================================
+
 
 const addToGoogleSheet = async (submission) => {
 
@@ -152,14 +119,14 @@ const addToGoogleSheet = async (submission) => {
 
 
     console.log(
-      "✅ Submission added to Google Sheet"
+      " Submission added to Google Sheet"
     );
 
 
   } catch (error) {
 
     console.error(
-      "❌ Google Sheets error:",
+      "Google Sheets error:",
       error.message
     );
 
@@ -601,6 +568,50 @@ app.post("/login", async (req, res) => {
     }
 
 
+    // ============================================
+    // CREATE LOGIN TOKEN
+    // ============================================
+
+    const token = jwt.sign(
+
+      {
+        userId: foundUser._id,
+        email: foundUser.email
+      },
+
+      process.env.JWT_SECRET,
+
+      {
+        expiresIn: "30d"
+      }
+
+    );
+
+
+    // ============================================
+    // STORE TOKEN IN HTTP-ONLY COOKIE
+    // ============================================
+
+    res.cookie(
+      "token",
+      token,
+      {
+        httpOnly: true,
+
+        secure: false,
+
+        sameSite: "lax",
+
+        maxAge:
+          30 * 24 * 60 * 60 * 1000
+      }
+    );
+
+
+    // ============================================
+    // SEND NORMAL LOGIN RESPONSE
+    // ============================================
+
     return res.status(200).json({
 
       success: true,
@@ -639,7 +650,68 @@ app.post("/login", async (req, res) => {
 
 });
 
+app.get("/auth/me", async (req, res) => {
 
+  try {
+
+    const token = req.cookies.token;
+
+    // No token
+    if (!token) {
+
+      return res.status(401).json({
+        loggedIn: false
+      });
+
+    }
+
+
+    // Verify token
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+
+    // Find user
+    const user = await User.findById(
+      decoded.userId
+    ).select("-password");
+
+
+    if (!user) {
+
+      return res.status(401).json({
+        loggedIn: false
+      });
+
+    }
+
+
+    // User is logged in
+    return res.status(200).json({
+
+      loggedIn: true,
+
+      user
+
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      "Auth check error:",
+      error.message
+    );
+
+    return res.status(401).json({
+      loggedIn: false
+    });
+
+  }
+
+});
 // ======================================================
 // EXAM ROUTES
 // ======================================================
@@ -1928,7 +2000,7 @@ const mongoURI =
 if (!mongoURI) {
 
   console.error(
-    "❌ MONGO_URI is missing in environment variables"
+    " MONGO_URI is missing in environment variables"
   );
 
   process.exit(1);
@@ -1937,13 +2009,13 @@ if (!mongoURI) {
 
 
 mongoose
-  .connect(mongoURI)
+  .connect(process.env.MONGO_URI)
 
   .then(() => {
 
     console.log(
-      "✅ MongoDB Connected"
-    );
+      " MongoDB Connected"
+    )
 
 
     app.listen(
@@ -1951,11 +2023,11 @@ mongoose
       () => {
 
         console.log(
-          `🚀 Server running on port ${PORT}`
+          ` Server running on port ${PORT}`
         );
 
         console.log(
-          `🌐 http://localhost:${PORT}`
+          `http://localhost:${PORT}`
         );
 
       }
@@ -1966,7 +2038,7 @@ mongoose
   .catch((error) => {
 
     console.error(
-      "❌ Failed to connect with MongoDB:",
+      " Failed to connect with MongoDB:",
       error.message
     );
 
