@@ -13,7 +13,7 @@ const resultSchema = new mongoose.Schema(
       required: true,
     },
 
-    rame: {
+    name: {
       type: String,
       required: true,
       trim: true,

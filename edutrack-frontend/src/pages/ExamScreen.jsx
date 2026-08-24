@@ -77,21 +77,34 @@ const ExamScreen = ({ user, examId, setExamId }) => {
         
             
             if (checkRes.data.attempted) {
-              const prev = checkRes.data.result;
-              setStats({
-                score: prev.score,
-                totalQuestions: prev.total_questions,
-                percentage: prev.percentage
-              });
+                  const prev = checkRes.data.result;
 
-              if (prev.userAnswers || prev.user_answers) {
-                setUserAnswers(prev.userAnswers || prev.user_answers || {});
-              }
-              
-              setIsSubmitted(true);
-              setLoading(false);
-              return;
-            }
+                  console.log("PREVIOUS RESULT:", prev);
+
+                  setStats({
+                    score: Number(prev.score ?? 0),
+
+                    totalQuestions: Number(
+                      prev.total_questions ??
+                      prev.totalQuestions ??
+                      questions.length
+                    ),
+
+                    percentage: Number(prev.percentage ?? 0)
+                  });
+
+                  if (prev.userAnswers || prev.user_answers) {
+                    setUserAnswers(
+                      prev.userAnswers ||
+                      prev.user_answers ||
+                      {}
+                    );
+                  }
+
+                  setIsSubmitted(true);
+                  setLoading(false);
+                  return;
+                }
           } catch (err) {
             console.error('Error checking previous attempt:', err);
           }
@@ -280,7 +293,18 @@ const ExamScreen = ({ user, examId, setExamId }) => {
 
   
   if (isSubmitted && stats) {
-    const wrongAnswers = Number(stats.totalQuestions) - Number(stats.score);
+            const totalQuestions = Number(
+          stats?.totalQuestions ?? questions.length ?? 0
+        );
+
+        const score = Number(
+          stats?.score ?? 0
+        );
+
+        const wrongAnswers = Math.max(
+          0,
+          totalQuestions - score
+        );
 
     return (
       <div className="results-card">
@@ -292,7 +316,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
           <div className="stat-box">
             <span className="stat-box-title">FINAL SCORE</span>
             <div className="stat-score-val">
-              {stats.score} / {stats.totalQuestions}
+              {score} / {totalQuestions}
             </div>
           </div>
 
@@ -305,7 +329,7 @@ const ExamScreen = ({ user, examId, setExamId }) => {
 
           <div className="stat-box-correct">
             <span className="stat-box-correct-title">Correct Answers</span>
-            <div className="stat-box-correct-val">{stats.score}</div>
+            <div className="stat-box-correct-val">{score}</div>
           </div>
 
           <div className="stat-box-wrong">
