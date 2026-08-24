@@ -14,7 +14,7 @@ const ADMIN_EMAILS = [
 ].map(email => email.toLowerCase());
 
 function App() {
-  const [user, setUser] = useState(null); 
+  const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [activeExamId, setActiveExamId] = useState(null);
   const [navbar,setNavbar]=useState(false)
