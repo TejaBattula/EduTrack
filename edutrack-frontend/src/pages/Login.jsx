@@ -29,11 +29,26 @@ const Login = ({ setUser }) => {
   const [registerationLoading,setRegistrationLoading]=useState(false)
   const [loginError,setloginerror]=useState('')
   const validateAndGetRole = (email) => {
-    if (!email || !email.toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`)) {
-      return null; // Invalid Domain
+    if (!email) {
+      return null;
     }
-    const isAdmin = ALLOWED_ADMIN_EMAILS.includes(email.toLowerCase());
-    return isAdmin ? 'admin' : 'student';
+  
+    email = email.toLowerCase().trim();
+  
+    // Student email format: s + 6 digits + @rguktsklm.ac.in
+    const studentEmailPattern = /^s\d{6}@rguktsklm\.ac\.in$/;
+  
+    const isAdmin = ALLOWED_ADMIN_EMAILS.includes(email);
+  
+    if (isAdmin) {
+      return 'admin';
+    }
+  
+    if (studentEmailPattern.test(email)) {
+      return 'student';
+    }
+  
+    return null;
   };
 
   const handleSubmit = async (e) => {
