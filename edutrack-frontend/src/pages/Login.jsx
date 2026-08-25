@@ -37,7 +37,8 @@ const Login = ({ setUser }) => {
   
     // Student email format: s + 6 digits + @rguktsklm.ac.in
     const studentEmailPattern = /^s\d{6}@rguktsklm\.ac\.in$/;
-  
+    console.log(studentEmailPattern);
+    
     const isAdmin = ALLOWED_ADMIN_EMAILS.includes(email);
   
     if (isAdmin) {
@@ -58,6 +59,8 @@ const Login = ({ setUser }) => {
     
     // 1. Email Domain Check
     const role = validateAndGetRole(formData.email);
+    console.log(role);
+    
     if (!role) {
       setError(`Access Restricted! Only @${ALLOWED_DOMAIN} email IDs are allowed.`);
       setloading(false);
