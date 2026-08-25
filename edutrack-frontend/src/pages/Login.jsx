@@ -36,8 +36,8 @@ const Login = ({ setUser }) => {
     email = email.toLowerCase().trim();
   
     // Student email format: s + 6 digits + @rguktsklm.ac.in
-    const studentEmailPattern = /^s\d{6}@rguktsklm\.ac\.in$/;
-    console.log(studentEmailPattern);
+    const studentEmailPattern = /^[sorn]\d{6}@rguktsklm\.ac\.in$/;
+    console.log(studentEmailPattern.test(email));
     
     const isAdmin = ALLOWED_ADMIN_EMAILS.includes(email);
   
